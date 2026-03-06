@@ -82,10 +82,11 @@ const Index = () => {
               </span>
             </div>
             <button
-              onClick={signOut}
-              className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground border border-foreground px-3 py-1"
+              onClick={() => navigate('/settings')}
+              className="border border-foreground p-2 hover:bg-foreground hover:text-background transition-colors"
+              title="Settings"
             >
-              Sign Out
+              <Settings size={16} />
             </button>
           </div>
         </div>
