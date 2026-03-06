@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Settings } from 'lucide-react';
 import { YearCalendar } from '@/components/YearCalendar';
 import { DailyHabits } from '@/components/DailyHabits';
 import { BucketList } from '@/components/BucketList';
@@ -9,7 +10,6 @@ import { RealTimeClock } from '@/components/RealTimeClock';
 import { HabitRadarChart } from '@/components/HabitRadarChart';
 import { StreakCounter } from '@/components/StreakCounter';
 import { DeadlineReminder } from '@/components/DeadlineReminder';
-import { NotificationSettings } from '@/components/NotificationSettings';
 import { UserAvatar } from '@/components/UserAvatar';
 import { useHabitData } from '@/hooks/useHabitData';
 import { useAuth } from '@/hooks/useAuth';
