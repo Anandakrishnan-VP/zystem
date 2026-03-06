@@ -23,6 +23,7 @@ export const useProfile = () => {
       return;
     }
 
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('profiles')
