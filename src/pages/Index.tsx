@@ -149,6 +149,10 @@ const Index = () => {
 
         <div className="section-divider" />
 
+        <NotificationSettings />
+
+        <div className="section-divider" />
+
         <BucketList
           year={year}
           items={data.bucketList}
