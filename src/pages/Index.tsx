@@ -92,6 +92,29 @@ const Index = () => {
         </div>
       </header>
 
+      {/* Quick Navigation */}
+      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-muted-foreground/20">
+        <div className="container max-w-6xl mx-auto px-6">
+          <div className="flex items-center gap-1 overflow-x-auto py-2 scrollbar-hide">
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: Calendar },
+              { id: 'habits', label: 'Habits', icon: CheckSquare },
+              { id: 'todos', label: 'Todos', icon: ListTodo },
+              { id: 'bucket-list', label: 'Bucket List', icon: Target },
+            ].map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                className="flex items-center gap-2 px-4 py-2 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors whitespace-nowrap"
+              >
+                <Icon size={14} />
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </nav>
+
       {/* Main content */}
       <main className="container max-w-7xl mx-auto px-6 py-12">
         <RealTimeClock />
