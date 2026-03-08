@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useProfile } from '@/hooks/useProfile';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
 const AVATARS = [
@@ -16,9 +17,33 @@ const ProfileSetup = () => {
   const [username, setUsername] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { updateProfile } = useProfile();
+  const { updateProfile, isProfileComplete, loading: profileLoading, hasLoadedProfile } = useProfile();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Redirect away if profile is already complete
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth');
+      return;
+    }
+    if (!authLoading && !profileLoading && hasLoadedProfile && isProfileComplete) {
+      navigate('/');
+    }
+  }, [authLoading, profileLoading, hasLoadedProfile, isProfileComplete, user, navigate]);
+
+  if (authLoading || profileLoading) {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+        <p className="font-mono text-sm uppercase tracking-wider">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!user || (hasLoadedProfile && isProfileComplete)) {
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
