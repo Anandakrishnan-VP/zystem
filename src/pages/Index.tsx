@@ -68,10 +68,13 @@ const Index = () => {
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
       <header className="border-b border-foreground">
-        <div className="container max-w-6xl mx-auto px-6 py-8 flex items-center justify-between">
-          <h1 className="font-mono text-lg font-bold uppercase tracking-widest">
-            Habit Tracker
-          </h1>
+        <div className="container max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="Zystem" className="w-8 h-8" />
+            <h1 className="font-mono text-lg font-bold uppercase tracking-widest">
+              Zystem
+            </h1>
+          </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <UserAvatar 
