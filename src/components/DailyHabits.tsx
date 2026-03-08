@@ -154,6 +154,11 @@ export const DailyHabits = ({
                       Future
                     </span>
                   )}
+                  {isPast && (
+                    <span className="font-mono text-xs text-muted-foreground">
+                      🔒 Locked
+                    </span>
+                  )}
                   {totalHabits === 0 && (
                     <span className="font-mono text-xs text-muted-foreground">
                       No habits
