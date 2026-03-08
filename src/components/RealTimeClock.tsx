@@ -29,6 +29,10 @@ export const RealTimeClock = () => {
     });
   };
 
+  const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+  const diffMs = endOfYear.getTime() - now.getTime();
+  const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
   return (
     <div className="text-center mb-8">
       <p className="font-mono text-2xl font-bold tracking-wider">
@@ -36,6 +40,9 @@ export const RealTimeClock = () => {
       </p>
       <p className="font-mono text-sm uppercase tracking-widest text-muted-foreground mt-1">
         {formatDate(now)}
+      </p>
+      <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground mt-2">
+        {daysLeft} {daysLeft === 1 ? 'day' : 'days'} left in {now.getFullYear()}
       </p>
     </div>
   );
