@@ -15,15 +15,18 @@ export const useProfile = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasLoadedProfile, setHasLoadedProfile] = useState(false);
 
   const fetchProfile = useCallback(async () => {
     if (!user) {
       setProfile(null);
+      setHasLoadedProfile(false);
       setLoading(false);
       return;
     }
 
     setLoading(true);
+    setHasLoadedProfile(false);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -40,6 +43,7 @@ export const useProfile = () => {
       console.error('Error fetching profile:', error);
     } finally {
       setLoading(false);
+      setHasLoadedProfile(true);
     }
   }, [user]);
 
@@ -67,6 +71,7 @@ export const useProfile = () => {
   return {
     profile,
     loading,
+    hasLoadedProfile,
     updateProfile,
     isProfileComplete,
     refetchProfile: fetchProfile,
