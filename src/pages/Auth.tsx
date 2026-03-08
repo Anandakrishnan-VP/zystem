@@ -121,9 +121,15 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
-        <h1 className="font-mono text-lg font-bold uppercase tracking-widest mb-12 text-center">
-          Habit Tracker
-        </h1>
+        <div className="flex flex-col items-center mb-12">
+          <img src="/logo.png" alt="Zystem" className="w-16 h-16 mb-4" />
+          <h1 className="font-mono text-lg font-bold uppercase tracking-widest text-center">
+            Zystem
+          </h1>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-1">
+            Your Level Up Partner
+          </p>
+        </div>
 
         <h2 className="font-mono text-sm font-semibold uppercase tracking-widest mb-8">
           {isLogin ? 'Sign In' : 'Create Account'}
