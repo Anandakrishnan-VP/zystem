@@ -177,6 +177,7 @@ const Index = () => {
 
         <div className="section-divider" />
 
+        <div id="bucket-list" className="scroll-mt-16">
         <BucketList
           year={year}
           items={data.bucketList}
@@ -184,6 +185,7 @@ const Index = () => {
           onToggle={toggleBucketItem}
           onRemove={removeBucketItem}
         />
+        </div>
       </main>
 
       {/* Footer */}
