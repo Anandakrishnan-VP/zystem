@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings } from 'lucide-react';
+import { Settings, Calendar, CheckSquare, ListTodo, Target } from 'lucide-react';
 import { YearCalendar } from '@/components/YearCalendar';
 import { DailyHabits } from '@/components/DailyHabits';
 import { BucketList } from '@/components/BucketList';
