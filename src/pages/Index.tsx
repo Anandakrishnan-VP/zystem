@@ -143,6 +143,8 @@ const Index = () => {
           </div>
           
           {/* Right side - Streak Counter + Radar Chart */}
+          
+          {/* Right side - Streak Counter + Radar Chart */}
           <div className="lg:col-span-1 flex flex-col gap-4">
             <StreakCounter
               habitCompletions={data.habitCompletions}
