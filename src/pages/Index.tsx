@@ -163,7 +163,7 @@ const Index = () => {
       <footer className="border-t border-foreground mt-24">
         <div className="container max-w-6xl mx-auto px-6 py-6">
           <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-            Built for discipline
+            A Zyphor Product
           </p>
         </div>
       </footer>
