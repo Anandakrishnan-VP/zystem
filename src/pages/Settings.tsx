@@ -8,6 +8,7 @@ import { UserAvatar } from '@/components/UserAvatar';
 import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useAvatarTheme } from '@/hooks/useTheme';
 
 const AVATARS = [
   { id: 1, url: '/avatars/avatar-1.png', label: 'Fire' },
