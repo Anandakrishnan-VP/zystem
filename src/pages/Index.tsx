@@ -166,12 +166,14 @@ const Index = () => {
 
         <div className="section-divider" />
 
+        <div id="todos" className="scroll-mt-16">
         <TodoList
           todos={data.todos}
           onAdd={addTodo}
           onToggle={toggleTodo}
           onRemove={removeTodo}
         />
+        </div>
 
         <div className="section-divider" />
 
