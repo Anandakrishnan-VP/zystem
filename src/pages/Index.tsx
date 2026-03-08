@@ -122,7 +122,7 @@ const Index = () => {
         <YearSelector year={year} onYearChange={setYear} />
         
         {/* Dashboard Grid: Left content + Right radar chart */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        <div id="dashboard" className="scroll-mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           {/* Left side - Main content */}
           <div className="lg:col-span-2">
             <YearCalendar
