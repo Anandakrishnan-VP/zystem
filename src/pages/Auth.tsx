@@ -219,8 +219,8 @@ const Auth = () => {
           </button>
         </div>
 
-        <p className="mt-12 text-center font-mono text-xs tracking-wider text-muted-foreground/60">
-          A <span className="font-bold text-muted-foreground">Zyphor</span> product
+        <p className="mt-8 text-center font-mono text-xs tracking-wider text-muted-foreground/60">
+          A <span className="font-bold text-foreground">Zyphor</span> product
         </p>
       </div>
     </div>
