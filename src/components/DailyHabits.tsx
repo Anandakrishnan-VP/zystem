@@ -109,6 +109,7 @@ export const DailyHabits = ({
           const dateForDay = getDateForDay(day);
           const isToday = dateForDay === today;
           const isFuture = new Date(dateForDay) > new Date(today);
+          const isPast = dateForDay < today;
           
           // Count completions for ALL habits on this date
           const completedCount = habitList.filter(h => habitCompletions[h.id]?.[dateForDay]).length;
