@@ -14,6 +14,7 @@ import { UserAvatar } from '@/components/UserAvatar';
 import { useHabitData } from '@/hooks/useHabitData';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
+import { useAvatarTheme } from '@/hooks/useTheme';
 
 
 const Index = () => {
