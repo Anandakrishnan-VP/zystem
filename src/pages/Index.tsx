@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings } from 'lucide-react';
+import { Settings, Calendar, CheckSquare, ListTodo, Target } from 'lucide-react';
 import { YearCalendar } from '@/components/YearCalendar';
 import { DailyHabits } from '@/components/DailyHabits';
 import { BucketList } from '@/components/BucketList';
@@ -92,6 +92,29 @@ const Index = () => {
         </div>
       </header>
 
+      {/* Quick Navigation */}
+      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-muted-foreground/20">
+        <div className="container max-w-6xl mx-auto px-6">
+          <div className="flex items-center gap-1 overflow-x-auto py-2 scrollbar-hide">
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: Calendar },
+              { id: 'habits', label: 'Habits', icon: CheckSquare },
+              { id: 'todos', label: 'Todos', icon: ListTodo },
+              { id: 'bucket-list', label: 'Bucket List', icon: Target },
+            ].map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                className="flex items-center gap-2 px-4 py-2 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors whitespace-nowrap"
+              >
+                <Icon size={14} />
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </nav>
+
       {/* Main content */}
       <main className="container max-w-7xl mx-auto px-6 py-12">
         <RealTimeClock />
@@ -99,7 +122,7 @@ const Index = () => {
         <YearSelector year={year} onYearChange={setYear} />
         
         {/* Dashboard Grid: Left content + Right radar chart */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        <div id="dashboard" className="scroll-mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           {/* Left side - Main content */}
           <div className="lg:col-span-2">
             <YearCalendar
@@ -130,6 +153,7 @@ const Index = () => {
 
         <div className="section-divider" />
 
+        <div id="habits" className="scroll-mt-16">
         <DailyHabits
           habitCompletions={data.habitCompletions}
           habitList={data.habitList}
@@ -138,18 +162,22 @@ const Index = () => {
           onEditHabit={editHabit}
           onDeleteHabit={deleteHabit}
         />
+        </div>
 
         <div className="section-divider" />
 
+        <div id="todos" className="scroll-mt-16">
         <TodoList
           todos={data.todos}
           onAdd={addTodo}
           onToggle={toggleTodo}
           onRemove={removeTodo}
         />
+        </div>
 
         <div className="section-divider" />
 
+        <div id="bucket-list" className="scroll-mt-16">
         <BucketList
           year={year}
           items={data.bucketList}
@@ -157,6 +185,7 @@ const Index = () => {
           onToggle={toggleBucketItem}
           onRemove={removeBucketItem}
         />
+        </div>
       </main>
 
       {/* Footer */}
