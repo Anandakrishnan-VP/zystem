@@ -23,6 +23,7 @@ const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { profile, loading: profileLoading, isProfileComplete, hasLoadedProfile } = useProfile();
   const navigate = useNavigate();
+  useAvatarTheme();
   
   const {
     data,
