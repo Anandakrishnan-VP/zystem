@@ -162,6 +162,13 @@ const Index = () => {
 
         <div className="section-divider" />
 
+        <div id="body-metrics" className="scroll-mt-16 mb-12">
+          <h2 className="section-title">Body Metrics</h2>
+          <BodyMetricsPanel />
+        </div>
+
+        <div className="section-divider" />
+
         <div id="habits" className="scroll-mt-16">
         <DailyHabits
           habitCompletions={data.habitCompletions}
