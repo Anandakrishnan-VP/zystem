@@ -162,6 +162,7 @@ const Index = () => {
           onEditHabit={editHabit}
           onDeleteHabit={deleteHabit}
         />
+        </div>
 
         <div className="section-divider" />
 
