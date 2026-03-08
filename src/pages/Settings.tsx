@@ -22,6 +22,7 @@ const Settings = () => {
   const { profile, loading: profileLoading, updateProfile } = useProfile();
   const navigate = useNavigate();
   const { toast } = useToast();
+  useAvatarTheme();
 
   const [username, setUsername] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
