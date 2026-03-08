@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      body_metrics: {
+        Row: {
+          age: number
+          created_at: string
+          height_cm: number
+          hip_cm: number | null
+          id: string
+          neck_cm: number | null
+          sex: string
+          updated_at: string
+          user_id: string
+          waist_cm: number | null
+          weight_kg: number
+        }
+        Insert: {
+          age: number
+          created_at?: string
+          height_cm: number
+          hip_cm?: number | null
+          id?: string
+          neck_cm?: number | null
+          sex: string
+          updated_at?: string
+          user_id: string
+          waist_cm?: number | null
+          weight_kg: number
+        }
+        Update: {
+          age?: number
+          created_at?: string
+          height_cm?: number
+          hip_cm?: number | null
+          id?: string
+          neck_cm?: number | null
+          sex?: string
+          updated_at?: string
+          user_id?: string
+          waist_cm?: number | null
+          weight_kg?: number
+        }
+        Relationships: []
+      }
       bucket_list: {
         Row: {
           completed: boolean
