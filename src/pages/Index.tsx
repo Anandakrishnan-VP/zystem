@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings, Calendar, CheckSquare, ListTodo, Target } from 'lucide-react';
+import { Settings, Calendar, CheckSquare, ListTodo, Target, Activity } from 'lucide-react';
 import { YearCalendar } from '@/components/YearCalendar';
 import { DailyHabits } from '@/components/DailyHabits';
 import { BucketList } from '@/components/BucketList';
@@ -11,6 +11,7 @@ import { HabitRadarChart } from '@/components/HabitRadarChart';
 import { StreakCounter } from '@/components/StreakCounter';
 import { DeadlineReminder } from '@/components/DeadlineReminder';
 import { UserAvatar } from '@/components/UserAvatar';
+import { BodyMetricsPanel } from '@/components/BodyMetrics';
 import { useHabitData } from '@/hooks/useHabitData';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
@@ -103,6 +104,7 @@ const Index = () => {
           <div className="flex items-center gap-1 overflow-x-auto py-2 scrollbar-hide">
             {[
               { id: 'dashboard', label: 'Dashboard', icon: Calendar },
+              { id: 'body-metrics', label: 'Body', icon: Activity },
               { id: 'habits', label: 'Habits', icon: CheckSquare },
               { id: 'todos', label: 'Todos', icon: ListTodo },
               { id: 'bucket-list', label: 'Bucket List', icon: Target },
@@ -141,6 +143,8 @@ const Index = () => {
           </div>
           
           {/* Right side - Streak Counter + Radar Chart */}
+          
+          {/* Right side - Streak Counter + Radar Chart */}
           <div className="lg:col-span-1 flex flex-col gap-4">
             <StreakCounter
               habitCompletions={data.habitCompletions}
@@ -154,6 +158,13 @@ const Index = () => {
               />
             </div>
           </div>
+        </div>
+
+        <div className="section-divider" />
+
+        <div id="body-metrics" className="scroll-mt-16 mb-12">
+          <h2 className="section-title">Body Metrics</h2>
+          <BodyMetricsPanel />
         </div>
 
         <div className="section-divider" />
