@@ -6,8 +6,9 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 @layer base {
-  :root {
-    /* Inverted: white on black */
+  /* Default / Air theme — pure white on black */
+  :root,
+  :root[data-theme="air"] {
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
 
@@ -38,15 +39,12 @@
 
     --radius: 0px;
 
-    /* Status colors - used sparingly */
     --status-success: 142 76% 36%;
     --status-danger: 0 84% 60%;
 
-    /* Typography */
     --font-sans: 'Inter', system-ui, sans-serif;
     --font-mono: 'IBM Plex Mono', monospace;
 
-    /* Sidebar - matching brutalist theme */
     --sidebar-background: 0 0% 0%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 0 0% 100%;
@@ -57,47 +55,133 @@
     --sidebar-ring: 0 0% 100%;
   }
 
-  .dark {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
+  /* Fire theme — neon orange-red accent on dark */
+  :root[data-theme="fire"] {
+    --background: 0 0% 3%;
+    --foreground: 15 100% 65%;
 
-    --card: 0 0% 0%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --card-foreground: 15 100% 65%;
 
-    --popover: 0 0% 0%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 15 100% 65%;
 
-    --primary: 0 0% 100%;
+    --primary: 15 100% 55%;
     --primary-foreground: 0 0% 0%;
 
-    --secondary: 0 0% 0%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 0 0% 8%;
+    --secondary-foreground: 15 100% 65%;
 
-    --muted: 0 0% 0%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 0 0% 8%;
+    --muted-foreground: 15 60% 45%;
 
-    --accent: 0 0% 100%;
+    --accent: 15 100% 55%;
     --accent-foreground: 0 0% 0%;
 
-    --destructive: 0 0% 100%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 0%;
 
-    --border: 0 0% 100%;
-    --input: 0 0% 100%;
-    --ring: 0 0% 100%;
+    --border: 15 80% 40%;
+    --input: 15 80% 40%;
+    --ring: 15 100% 55%;
 
-    /* Status colors - same in dark mode */
     --status-success: 142 76% 36%;
     --status-danger: 0 84% 60%;
 
-    --sidebar-background: 0 0% 0%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 0 0% 100%;
+    --sidebar-background: 0 0% 3%;
+    --sidebar-foreground: 15 100% 65%;
+    --sidebar-primary: 15 100% 55%;
     --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 0 0% 100%;
+    --sidebar-accent: 15 100% 55%;
     --sidebar-accent-foreground: 0 0% 0%;
-    --sidebar-border: 0 0% 100%;
-    --sidebar-ring: 0 0% 100%;
+    --sidebar-border: 15 80% 40%;
+    --sidebar-ring: 15 100% 55%;
+  }
+
+  /* Water theme — neon cyan-blue accent on dark */
+  :root[data-theme="water"] {
+    --background: 210 30% 3%;
+    --foreground: 190 100% 60%;
+
+    --card: 210 30% 5%;
+    --card-foreground: 190 100% 60%;
+
+    --popover: 210 30% 5%;
+    --popover-foreground: 190 100% 60%;
+
+    --primary: 190 100% 50%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 210 20% 8%;
+    --secondary-foreground: 190 100% 60%;
+
+    --muted: 210 20% 8%;
+    --muted-foreground: 190 50% 40%;
+
+    --accent: 190 100% 50%;
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 0%;
+
+    --border: 190 70% 35%;
+    --input: 190 70% 35%;
+    --ring: 190 100% 50%;
+
+    --status-success: 142 76% 36%;
+    --status-danger: 0 84% 60%;
+
+    --sidebar-background: 210 30% 3%;
+    --sidebar-foreground: 190 100% 60%;
+    --sidebar-primary: 190 100% 50%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 190 100% 50%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 190 70% 35%;
+    --sidebar-ring: 190 100% 50%;
+  }
+
+  /* Electric theme — neon yellow accent on dark */
+  :root[data-theme="electric"] {
+    --background: 50 20% 3%;
+    --foreground: 50 100% 60%;
+
+    --card: 50 20% 5%;
+    --card-foreground: 50 100% 60%;
+
+    --popover: 50 20% 5%;
+    --popover-foreground: 50 100% 60%;
+
+    --primary: 50 100% 50%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 50 15% 8%;
+    --secondary-foreground: 50 100% 60%;
+
+    --muted: 50 15% 8%;
+    --muted-foreground: 50 50% 40%;
+
+    --accent: 50 100% 50%;
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 0%;
+
+    --border: 50 70% 35%;
+    --input: 50 70% 35%;
+    --ring: 50 100% 50%;
+
+    --status-success: 142 76% 36%;
+    --status-danger: 0 84% 60%;
+
+    --sidebar-background: 50 20% 3%;
+    --sidebar-foreground: 50 100% 60%;
+    --sidebar-primary: 50 100% 50%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 50 100% 50%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 50 70% 35%;
+    --sidebar-ring: 50 100% 50%;
   }
 }
 
