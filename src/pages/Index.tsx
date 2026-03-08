@@ -104,6 +104,7 @@ const Index = () => {
           <div className="flex items-center gap-1 overflow-x-auto py-2 scrollbar-hide">
             {[
               { id: 'dashboard', label: 'Dashboard', icon: Calendar },
+              { id: 'body-metrics', label: 'Body', icon: Activity },
               { id: 'habits', label: 'Habits', icon: CheckSquare },
               { id: 'todos', label: 'Todos', icon: ListTodo },
               { id: 'bucket-list', label: 'Bucket List', icon: Target },
