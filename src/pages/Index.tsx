@@ -20,7 +20,7 @@ const Index = () => {
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear);
   const { user, loading: authLoading, signOut } = useAuth();
-  const { profile, loading: profileLoading, isProfileComplete } = useProfile();
+  const { profile, loading: profileLoading, isProfileComplete, hasLoadedProfile } = useProfile();
   const navigate = useNavigate();
   
   const {
@@ -45,10 +45,10 @@ const Index = () => {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (!authLoading && !profileLoading && user && !isProfileComplete) {
+    if (!authLoading && !profileLoading && hasLoadedProfile && user && !isProfileComplete) {
       navigate('/profile-setup');
     }
-  }, [user, authLoading, profileLoading, isProfileComplete, navigate]);
+  }, [user, authLoading, profileLoading, hasLoadedProfile, isProfileComplete, navigate]);
 
   if (authLoading || profileLoading || dataLoading) {
     return (
@@ -58,7 +58,7 @@ const Index = () => {
     );
   }
 
-  if (!user || !isProfileComplete) {
+  if (!user || (hasLoadedProfile && !isProfileComplete)) {
     return null;
   }
 
