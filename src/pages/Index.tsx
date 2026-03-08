@@ -153,6 +153,7 @@ const Index = () => {
 
         <div className="section-divider" />
 
+        <div id="habits" className="scroll-mt-16">
         <DailyHabits
           habitCompletions={data.habitCompletions}
           habitList={data.habitList}
