@@ -218,6 +218,10 @@ const Auth = () => {
             {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
           </button>
         </div>
+
+        <p className="mt-12 text-center font-mono text-xs tracking-wider text-muted-foreground/60">
+          A <span className="font-bold text-muted-foreground">Zyphor</span> product
+        </p>
       </div>
     </div>
   );
