@@ -1,49 +1,151 @@
 import { useState, useEffect } from 'react';
+import { Target } from 'lucide-react';
 
 export const RealTimeClock = () => {
   const [now, setNow] = useState(new Date());
+  const [targetDate, setTargetDate] = useState<string | null>(() => {
+    return localStorage.getItem('countdown-target');
+  });
+  const [targetLabel, setTargetLabel] = useState<string>(() => {
+    return localStorage.getItem('countdown-label') || '';
+  });
+  const [editing, setEditing] = useState(false);
+  const [tempDate, setTempDate] = useState('');
+  const [tempLabel, setTempLabel] = useState('');
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(new Date());
-    }, 1000);
-
+    const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+  const formatDate = (date: Date) =>
+    date.toLocaleDateString('en-US', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
     });
-  };
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true
+  const formatTime = (date: Date) =>
+    date.toLocaleTimeString('en-US', {
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true,
     });
-  };
 
   const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
-  const diffMs = endOfYear.getTime() - now.getTime();
-  const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  const daysLeftInYear = Math.ceil((endOfYear.getTime() - now.getTime()) / 86400000);
+
+  // Countdown calc
+  const getCountdown = () => {
+    if (!targetDate) return null;
+    const target = new Date(targetDate + 'T23:59:59');
+    const diffMs = target.getTime() - now.getTime();
+    if (diffMs <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0, passed: true };
+    const days = Math.floor(diffMs / 86400000);
+    const hours = Math.floor((diffMs % 86400000) / 3600000);
+    const minutes = Math.floor((diffMs % 3600000) / 60000);
+    const seconds = Math.floor((diffMs % 60000) / 1000);
+    return { days, hours, minutes, seconds, passed: false };
+  };
+
+  const countdown = getCountdown();
+
+  const handleSave = () => {
+    if (tempDate) {
+      setTargetDate(tempDate);
+      setTargetLabel(tempLabel);
+      localStorage.setItem('countdown-target', tempDate);
+      localStorage.setItem('countdown-label', tempLabel);
+    }
+    setEditing(false);
+  };
+
+  const handleClear = () => {
+    setTargetDate(null);
+    setTargetLabel('');
+    localStorage.removeItem('countdown-target');
+    localStorage.removeItem('countdown-label');
+    setEditing(false);
+  };
 
   return (
-    <div className="text-center mb-8">
-      <p className="font-mono text-2xl font-bold tracking-wider">
-        {formatTime(now)}
-      </p>
-      <p className="font-mono text-sm uppercase tracking-widest text-muted-foreground mt-1">
-        {formatDate(now)}
-      </p>
-      <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground mt-2">
-        {daysLeft} {daysLeft === 1 ? 'day' : 'days'} left in {now.getFullYear()}
-      </p>
+    <div className="flex items-start justify-between mb-8 gap-4">
+      {/* Left: Clock & date */}
+      <div className="text-left">
+        <p className="font-mono text-2xl font-bold tracking-wider">
+          {formatTime(now)}
+        </p>
+        <p className="font-mono text-sm uppercase tracking-widest text-muted-foreground mt-1">
+          {formatDate(now)}
+        </p>
+        <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground mt-2">
+          {daysLeftInYear} {daysLeftInYear === 1 ? 'day' : 'days'} left in {now.getFullYear()}
+        </p>
+      </div>
+
+      {/* Right: Countdown */}
+      <div className="text-right flex-shrink-0">
+        {editing ? (
+          <div className="flex flex-col items-end gap-1">
+            <input
+              type="text"
+              placeholder="Label (optional)"
+              value={tempLabel}
+              onChange={e => setTempLabel(e.target.value)}
+              className="font-mono text-[10px] bg-transparent border border-muted-foreground/30 px-2 py-0.5 w-32 text-right text-foreground placeholder:text-muted-foreground/40"
+            />
+            <input
+              type="date"
+              value={tempDate}
+              onChange={e => setTempDate(e.target.value)}
+              className="font-mono text-[10px] bg-transparent border border-muted-foreground/30 px-2 py-0.5 w-32 text-right text-foreground"
+            />
+            <div className="flex gap-1">
+              <button onClick={handleSave} className="font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 border border-foreground hover:bg-foreground hover:text-background">
+                Set
+              </button>
+              {targetDate && (
+                <button onClick={handleClear} className="font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 border border-muted-foreground/30 text-muted-foreground hover:text-foreground">
+                  Clear
+                </button>
+              )}
+              <button onClick={() => setEditing(false)} className="font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 text-muted-foreground hover:text-foreground">
+                ✕
+              </button>
+            </div>
+          </div>
+        ) : countdown ? (
+          <button
+            onClick={() => { setTempDate(targetDate || ''); setTempLabel(targetLabel); setEditing(true); }}
+            className="group cursor-pointer text-right"
+          >
+            {targetLabel && (
+              <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                {targetLabel}
+              </p>
+            )}
+            {countdown.passed ? (
+              <p className="font-mono text-xs text-muted-foreground">Target reached</p>
+            ) : (
+              <>
+                <p className="font-mono text-lg font-bold tracking-wider">
+                  {countdown.days}<span className="text-[10px] text-muted-foreground">d </span>
+                  {String(countdown.hours).padStart(2, '0')}<span className="text-[10px] text-muted-foreground">h </span>
+                  {String(countdown.minutes).padStart(2, '0')}<span className="text-[10px] text-muted-foreground">m </span>
+                  {String(countdown.seconds).padStart(2, '0')}<span className="text-[10px] text-muted-foreground">s</span>
+                </p>
+                <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground/50 group-hover:text-muted-foreground">
+                  click to edit
+                </p>
+              </>
+            )}
+          </button>
+        ) : (
+          <button
+            onClick={() => { setTempDate(''); setTempLabel(''); setEditing(true); }}
+            className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+          >
+            <Target size={12} />
+            Set countdown
+          </button>
+        )}
+      </div>
     </div>
   );
 };
