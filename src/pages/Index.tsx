@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings, Calendar, CheckSquare, ListTodo, Target, Activity } from 'lucide-react';
+import { Settings, Calendar, CheckSquare, ListTodo, Target, Activity, StickyNote } from 'lucide-react';
 import { YearCalendar } from '@/components/YearCalendar';
 import { DailyHabits } from '@/components/DailyHabits';
 import { BucketList } from '@/components/BucketList';
@@ -87,6 +87,13 @@ const Index = () => {
                 {profile?.username}
               </span>
             </div>
+            <button
+              onClick={() => navigate('/notes')}
+              className="border border-foreground p-2 hover:bg-foreground hover:text-background transition-colors"
+              title="Notes"
+            >
+              <StickyNote size={16} />
+            </button>
             <button
               onClick={() => navigate('/settings')}
               className="border border-foreground p-2 hover:bg-foreground hover:text-background transition-colors"
