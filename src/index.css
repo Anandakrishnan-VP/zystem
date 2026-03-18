@@ -232,24 +232,41 @@
     @apply border-t border-foreground my-12;
   }
 
-  /* Calendar day cell */
-  .day-cell {
-    @apply w-3 h-3 border border-foreground bg-background cursor-default;
-    transition: none;
+  /* GitHub/LeetCode contribution grid */
+  .contribution-graph {
+    @apply overflow-x-auto pb-2;
   }
 
-  .day-cell.status-success {
-    background-color: hsl(var(--status-success));
-    @apply border-transparent;
+  .contrib-cell {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    outline: 1px solid hsla(0, 0%, 100%, 0.05);
   }
 
-  .day-cell.status-danger {
-    background-color: hsl(var(--status-danger));
-    @apply border-transparent;
+  .contrib-level-empty {
+    background: transparent;
+    outline: none;
   }
 
-  .day-cell.empty {
-    @apply border-transparent bg-transparent cursor-default;
+  .contrib-level-0 {
+    background: hsl(0 0% 14%);
+  }
+
+  .contrib-level-1 {
+    background: hsl(142 50% 20%);
+  }
+
+  .contrib-level-2 {
+    background: hsl(142 55% 33%);
+  }
+
+  .contrib-level-3 {
+    background: hsl(142 60% 45%);
+  }
+
+  .contrib-level-4 {
+    background: hsl(142 72% 55%);
   }
 
   /* Todo item */
