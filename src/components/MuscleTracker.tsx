@@ -135,10 +135,15 @@ export const MuscleTracker = () => {
         </p>
       </div>
 
-      <div className="p-4 flex gap-6">
-        {/* Diagram */}
-        <div className="w-36 flex-shrink-0">
-          <MuscleDiagram counts={counts} maxCount={maxCount} todayTrained={isTodayTrained} />
+      <div className="p-4 flex gap-4">
+        {/* Diagrams - Front & Back */}
+        <div className="flex gap-1 flex-shrink-0">
+          <div className="w-[72px]">
+            <FrontDiagram counts={counts} maxCount={maxCount} />
+          </div>
+          <div className="w-[72px]">
+            <BackDiagram counts={counts} maxCount={maxCount} />
+          </div>
         </div>
 
         {/* Muscle checklist */}
