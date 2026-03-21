@@ -64,7 +64,7 @@ const BackDiagram = ({ counts, maxCount }: {
   const mo = (m: MuscleGroup) => getFillOpacity(counts[m] || 0);
 
   return (
-    <svg viewBox="0 0 200 400" className="w-full h-full max-h-[340px]" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 200 400" className="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
       <ellipse cx="100" cy="32" rx="18" ry="22" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.4" />
       <rect x="92" y="52" width="16" height="14" rx="3" fill={mc('neck')} fillOpacity={mo('neck')} stroke={mc('neck')} strokeWidth="1" />
       {/* Traps - larger on back view */}
