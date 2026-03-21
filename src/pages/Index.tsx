@@ -172,10 +172,10 @@ const Index = () => {
 
         <div id="body-metrics" className="scroll-mt-16 mb-12">
           <h2 className="section-title">Body Metrics</h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <BodyMetricsPanel />
-            <MuscleTracker />
           </div>
+          <MuscleTracker />
         </div>
 
         <div className="section-divider" />

@@ -26,7 +26,7 @@ const FrontDiagram = ({ counts, maxCount }: {
   const mo = (m: MuscleGroup) => getFillOpacity(counts[m] || 0);
 
   return (
-    <svg viewBox="0 0 200 400" className="w-full h-full max-h-[340px]" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 200 400" className="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
       <ellipse cx="100" cy="32" rx="18" ry="22" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.4" />
       <rect x="92" y="52" width="16" height="14" rx="3" fill={mc('neck')} fillOpacity={mo('neck')} stroke={mc('neck')} strokeWidth="1" />
       <polygon points="76,66 92,58 92,72 76,76" fill={mc('traps')} fillOpacity={mo('traps')} stroke={mc('traps')} strokeWidth="1" />
@@ -64,7 +64,7 @@ const BackDiagram = ({ counts, maxCount }: {
   const mo = (m: MuscleGroup) => getFillOpacity(counts[m] || 0);
 
   return (
-    <svg viewBox="0 0 200 400" className="w-full h-full max-h-[340px]" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 200 400" className="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
       <ellipse cx="100" cy="32" rx="18" ry="22" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.4" />
       <rect x="92" y="52" width="16" height="14" rx="3" fill={mc('neck')} fillOpacity={mo('neck')} stroke={mc('neck')} strokeWidth="1" />
       {/* Traps - larger on back view */}
@@ -135,25 +135,25 @@ export const MuscleTracker = () => {
         </p>
       </div>
 
-      <div className="p-4 flex gap-4">
-        {/* Diagrams - Front & Back */}
-        <div className="flex gap-1 flex-shrink-0">
-          <div className="w-[72px]">
-            <FrontDiagram counts={counts} maxCount={maxCount} />
-          </div>
-          <div className="w-[72px]">
-            <BackDiagram counts={counts} maxCount={maxCount} />
-          </div>
+      {/* Diagrams - Front & Back side by side, large */}
+      <div className="p-4 flex justify-center gap-2">
+        <div className="w-1/2 max-w-[220px]">
+          <FrontDiagram counts={counts} maxCount={maxCount} />
         </div>
+        <div className="w-1/2 max-w-[220px]">
+          <BackDiagram counts={counts} maxCount={maxCount} />
+        </div>
+      </div>
 
-        {/* Muscle checklist */}
-        <div className="flex-1 space-y-3 overflow-y-auto max-h-[380px]">
+      {/* Muscle checklist */}
+      <div className="px-4 pb-4 space-y-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {muscleCategories.map(cat => (
             <div key={cat.label}>
               <p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mb-1.5">
                 {cat.label}
               </p>
-              <div className="grid grid-cols-2 gap-1">
+              <div className="space-y-1">
                 {cat.muscles.map(muscle => {
                   const trained = isTodayTrained(muscle);
                   const count = counts[muscle] || 0;
@@ -162,7 +162,7 @@ export const MuscleTracker = () => {
                     <button
                       key={muscle}
                       onClick={() => toggleMuscle(muscle)}
-                      className="flex items-center gap-1.5 px-2 py-1.5 text-left font-mono text-[10px] uppercase tracking-wider border transition-all"
+                      className="flex items-center gap-1.5 w-full px-2 py-1.5 text-left font-mono text-[10px] uppercase tracking-wider border transition-all"
                       style={{
                         borderColor: trained ? color : 'hsl(var(--muted-foreground) / 0.2)',
                         backgroundColor: trained ? color : 'transparent',
@@ -180,27 +180,27 @@ export const MuscleTracker = () => {
               </div>
             </div>
           ))}
+        </div>
 
-          {/* Legend */}
-          <div className="pt-2 border-t border-muted-foreground/20">
-            <p className="font-mono text-[8px] uppercase tracking-wider text-muted-foreground mb-1">
-              7-day frequency
-            </p>
-            <div className="flex gap-2">
-              {[
-                { color: 'hsl(270 70% 55%)', label: 'Most' },
-                { color: 'hsl(45 90% 55%)', label: 'High' },
-                { color: 'hsl(142 60% 45%)', label: 'Mid' },
-                { color: 'hsl(0 70% 50%)', label: 'Low' },
-              ].map(item => (
-                <div key={item.label} className="flex items-center gap-1">
-                  <div className="w-2.5 h-2.5" style={{ backgroundColor: item.color }} />
-                  <span className="font-mono text-[8px] uppercase tracking-wider text-muted-foreground">
-                    {item.label}
-                  </span>
-                </div>
-              ))}
-            </div>
+        {/* Legend */}
+        <div className="pt-2 border-t border-muted-foreground/20">
+          <p className="font-mono text-[8px] uppercase tracking-wider text-muted-foreground mb-1">
+            7-day frequency
+          </p>
+          <div className="flex gap-3">
+            {[
+              { color: 'hsl(270 70% 55%)', label: 'Most' },
+              { color: 'hsl(45 90% 55%)', label: 'High' },
+              { color: 'hsl(142 60% 45%)', label: 'Mid' },
+              { color: 'hsl(0 70% 50%)', label: 'Low' },
+            ].map(item => (
+              <div key={item.label} className="flex items-center gap-1">
+                <div className="w-2.5 h-2.5" style={{ backgroundColor: item.color }} />
+                <span className="font-mono text-[8px] uppercase tracking-wider text-muted-foreground">
+                  {item.label}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
