@@ -151,6 +151,30 @@ export type Database = {
         }
         Relationships: []
       }
+      muscle_training: {
+        Row: {
+          created_at: string
+          id: string
+          muscle_group: string
+          trained_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          muscle_group: string
+          trained_date?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          muscle_group?: string
+          trained_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notes: {
         Row: {
           content: string
