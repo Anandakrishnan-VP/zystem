@@ -12,6 +12,7 @@ import { StreakCounter } from '@/components/StreakCounter';
 import { DeadlineReminder } from '@/components/DeadlineReminder';
 import { UserAvatar } from '@/components/UserAvatar';
 import { BodyMetricsPanel } from '@/components/BodyMetrics';
+import { MuscleTracker } from '@/components/MuscleTracker';
 import { useHabitData } from '@/hooks/useHabitData';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
