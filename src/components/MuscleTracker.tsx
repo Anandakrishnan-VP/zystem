@@ -1,4 +1,4 @@
-import { useMuscleTraining, MUSCLE_GROUPS, MUSCLE_LABELS, MuscleGroup } from '@/hooks/useMuscleTraining';
+import { useMuscleTraining, MUSCLE_GROUPS, MUSCLE_LABELS, MuscleGroup, TimeRange } from '@/hooks/useMuscleTraining';
 import { Check } from 'lucide-react';
 
 // Color scale: purple (most) → gold → green → red (least but trained)
