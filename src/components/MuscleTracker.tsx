@@ -134,11 +134,28 @@ export const MuscleTracker = () => {
 
   return (
     <div className="border border-foreground">
-      <div className="px-4 py-3 border-b border-foreground">
-        <h3 className="font-mono text-xs font-bold uppercase tracking-widest">Muscle Tracker</h3>
-        <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider mt-0.5">
-          7-day heat map • tap to log today
-        </p>
+      <div className="px-4 py-3 border-b border-foreground flex items-center justify-between">
+        <div>
+          <h3 className="font-mono text-xs font-bold uppercase tracking-widest">Muscle Tracker</h3>
+          <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider mt-0.5">
+            heat map • tap to log today
+          </p>
+        </div>
+        <div className="flex gap-1">
+          {(['weekly', 'monthly', 'yearly'] as TimeRange[]).map(r => (
+            <button
+              key={r}
+              onClick={() => setTimeRange(r)}
+              className={`font-mono text-[9px] uppercase tracking-wider px-2 py-1 border transition-colors ${
+                timeRange === r
+                  ? 'border-foreground bg-foreground text-background'
+                  : 'border-muted-foreground/30 text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {TIME_RANGE_LABELS[r]}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Diagrams - Front & Back side by side, large */}
