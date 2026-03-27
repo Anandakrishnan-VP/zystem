@@ -161,7 +161,7 @@ const Libraries = () => {
           <div className="space-y-4">
             {filteredGroups.map(group => {
               const isCollapsed = collapsedGroups.has(group.id);
-              const groupLinks = 'links' in group ? (group as any).links as SavedLink[] : getLinksForGroup(group.id);
+              const groupLinks = group.filteredLinks;
               return (
                 <div key={group.id} className="border border-foreground">
                   {/* Group Header */}
