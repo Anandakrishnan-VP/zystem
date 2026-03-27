@@ -104,8 +104,14 @@ const BackDiagram = ({ counts, maxCount }: {
   );
 };
 
+const TIME_RANGE_LABELS: Record<TimeRange, string> = {
+  weekly: '7 Days',
+  monthly: '30 Days',
+  yearly: '365 Days',
+};
+
 export const MuscleTracker = () => {
-  const { loading, toggleMuscle, getMuscleCounts, isTodayTrained } = useMuscleTraining();
+  const { loading, toggleMuscle, getMuscleCounts, isTodayTrained, timeRange, setTimeRange } = useMuscleTraining();
 
   if (loading) {
     return (
