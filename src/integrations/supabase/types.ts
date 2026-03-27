@@ -83,6 +83,33 @@ export type Database = {
         }
         Relationships: []
       }
+      countdown_targets: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          target_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label?: string
+          target_date: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          target_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       habit_completions: {
         Row: {
           completed: boolean
