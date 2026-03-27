@@ -74,17 +74,17 @@ const Libraries = () => {
     });
   };
 
-  const filteredGroups = groups.map(g => {
+  const filteredGroups: Array<LinkGroup & { filteredLinks: SavedLink[] }> = groups.map(g => {
     const groupLinks = getLinksForGroup(g.id);
-    if (!search) return { ...g, links: groupLinks };
+    if (!search) return { ...g, filteredLinks: groupLinks };
     const q = search.toLowerCase();
     const filtered = groupLinks.filter(l =>
       l.title.toLowerCase().includes(q) || l.url.toLowerCase().includes(q) ||
-      l.notes.toLowerCase().includes(q) || l.tags.some(t => t.toLowerCase().includes(q))
+      (l.notes || '').toLowerCase().includes(q) || (l.tags || []).some(t => t.toLowerCase().includes(q))
     );
     const groupMatch = g.name.toLowerCase().includes(q);
-    return { ...g, links: groupMatch ? groupLinks : filtered };
-  }).filter(g => g.links.length > 0 || (!search && true));
+    return { ...g, filteredLinks: groupMatch ? groupLinks : filtered };
+  }).filter(g => g.filteredLinks.length > 0 || !search);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
