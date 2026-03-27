@@ -208,7 +208,7 @@ export const MuscleTracker = () => {
         {/* Legend */}
         <div className="pt-2 border-t border-muted-foreground/20">
           <p className="font-mono text-[8px] uppercase tracking-wider text-muted-foreground mb-1">
-            7-day frequency
+            {TIME_RANGE_LABELS[timeRange]} frequency
           </p>
           <div className="flex gap-3">
             {[
