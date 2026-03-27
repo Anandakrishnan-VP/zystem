@@ -178,6 +178,30 @@ export type Database = {
         }
         Relationships: []
       }
+      link_groups: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       muscle_training: {
         Row: {
           created_at: string
@@ -276,6 +300,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      saved_links: {
+        Row: {
+          created_at: string
+          group_id: string
+          id: string
+          notes: string | null
+          sort_order: number
+          tags: string[] | null
+          title: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          id?: string
+          notes?: string | null
+          sort_order?: number
+          tags?: string[] | null
+          title: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          id?: string
+          notes?: string | null
+          sort_order?: number
+          tags?: string[] | null
+          title?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_links_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "link_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       streak_revivals: {
         Row: {
