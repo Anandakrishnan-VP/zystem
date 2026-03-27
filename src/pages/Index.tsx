@@ -89,6 +89,13 @@ const Index = () => {
               </span>
             </div>
             <button
+              onClick={() => navigate('/libraries')}
+              className="border border-foreground p-2 hover:bg-foreground hover:text-background transition-colors"
+              title="Libraries"
+            >
+              <FolderOpen size={16} />
+            </button>
+            <button
               onClick={() => navigate('/notes')}
               className="border border-foreground p-2 hover:bg-foreground hover:text-background transition-colors"
               title="Notes"
