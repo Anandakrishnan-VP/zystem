@@ -1,4 +1,4 @@
-import { useMuscleTraining, MUSCLE_GROUPS, MUSCLE_LABELS, MuscleGroup } from '@/hooks/useMuscleTraining';
+import { useMuscleTraining, MUSCLE_GROUPS, MUSCLE_LABELS, MuscleGroup, TimeRange } from '@/hooks/useMuscleTraining';
 import { Check } from 'lucide-react';
 
 // Color scale: purple (most) → gold → green → red (least but trained)
@@ -104,8 +104,14 @@ const BackDiagram = ({ counts, maxCount }: {
   );
 };
 
+const TIME_RANGE_LABELS: Record<TimeRange, string> = {
+  weekly: '7 Days',
+  monthly: '30 Days',
+  yearly: '365 Days',
+};
+
 export const MuscleTracker = () => {
-  const { loading, toggleMuscle, getMuscleCounts, isTodayTrained } = useMuscleTraining();
+  const { loading, toggleMuscle, getMuscleCounts, isTodayTrained, timeRange, setTimeRange } = useMuscleTraining();
 
   if (loading) {
     return (
@@ -128,11 +134,28 @@ export const MuscleTracker = () => {
 
   return (
     <div className="border border-foreground">
-      <div className="px-4 py-3 border-b border-foreground">
-        <h3 className="font-mono text-xs font-bold uppercase tracking-widest">Muscle Tracker</h3>
-        <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider mt-0.5">
-          7-day heat map • tap to log today
-        </p>
+      <div className="px-4 py-3 border-b border-foreground flex items-center justify-between">
+        <div>
+          <h3 className="font-mono text-xs font-bold uppercase tracking-widest">Muscle Tracker</h3>
+          <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider mt-0.5">
+            heat map • tap to log today
+          </p>
+        </div>
+        <div className="flex gap-1">
+          {(['weekly', 'monthly', 'yearly'] as TimeRange[]).map(r => (
+            <button
+              key={r}
+              onClick={() => setTimeRange(r)}
+              className={`font-mono text-[9px] uppercase tracking-wider px-2 py-1 border transition-colors ${
+                timeRange === r
+                  ? 'border-foreground bg-foreground text-background'
+                  : 'border-muted-foreground/30 text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {TIME_RANGE_LABELS[r]}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Diagrams - Front & Back side by side, large */}
@@ -185,7 +208,7 @@ export const MuscleTracker = () => {
         {/* Legend */}
         <div className="pt-2 border-t border-muted-foreground/20">
           <p className="font-mono text-[8px] uppercase tracking-wider text-muted-foreground mb-1">
-            7-day frequency
+            {TIME_RANGE_LABELS[timeRange]} frequency
           </p>
           <div className="flex gap-3">
             {[

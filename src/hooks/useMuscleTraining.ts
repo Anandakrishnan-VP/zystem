@@ -17,6 +17,8 @@ export const MUSCLE_GROUPS = [
 
 export type MuscleGroup = typeof MUSCLE_GROUPS[number];
 
+export type TimeRange = 'weekly' | 'monthly' | 'yearly';
+
 export const MUSCLE_LABELS: Record<MuscleGroup, string> = {
   chest: 'Chest',
   upper_back: 'Upper Back',
@@ -35,31 +37,40 @@ export const MUSCLE_LABELS: Record<MuscleGroup, string> = {
   neck: 'Neck',
 };
 
+const getDaysForRange = (range: TimeRange): number => {
+  switch (range) {
+    case 'weekly': return 7;
+    case 'monthly': return 30;
+    case 'yearly': return 365;
+  }
+};
+
 export function useMuscleTraining() {
   const { user } = useAuth();
   const [training, setTraining] = useState<MuscleTrainingEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState<TimeRange>('weekly');
 
   const today = new Date().toISOString().split('T')[0];
 
-  // Fetch last 7 days of training
   const fetchTraining = useCallback(async () => {
     if (!user) return;
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const fromDate = sevenDaysAgo.toISOString().split('T')[0];
+    const daysBack = getDaysForRange(timeRange);
+    const fromDate = new Date();
+    fromDate.setDate(fromDate.getDate() - daysBack);
+    const fromStr = fromDate.toISOString().split('T')[0];
 
     const { data, error } = await supabase
       .from('muscle_training')
       .select('muscle_group, trained_date')
       .eq('user_id', user.id)
-      .gte('trained_date', fromDate);
+      .gte('trained_date', fromStr);
 
     if (!error && data) {
       setTraining(data);
     }
     setLoading(false);
-  }, [user]);
+  }, [user, timeRange]);
 
   useEffect(() => { fetchTraining(); }, [fetchTraining]);
 
@@ -88,7 +99,6 @@ export function useMuscleTraining() {
     }
   };
 
-  // Count training sessions per muscle in last 7 days
   const getMuscleCounts = (): Record<string, number> => {
     const counts: Record<string, number> = {};
     for (const mg of MUSCLE_GROUPS) counts[mg] = 0;
@@ -102,5 +112,5 @@ export function useMuscleTraining() {
     return training.some(t => t.muscle_group === muscle && t.trained_date === today);
   };
 
-  return { training, loading, toggleMuscle, getMuscleCounts, isTodayTrained, today };
+  return { training, loading, toggleMuscle, getMuscleCounts, isTodayTrained, today, timeRange, setTimeRange };
 }
