@@ -110,11 +110,11 @@ export const RealTimeClock = () => {
               <p className="font-mono text-xs text-muted-foreground">Target reached</p>
             ) : (
               <>
-                <p className="font-mono text-lg font-bold tracking-wider">
-                  {countdown.totalDays}<span className="text-[10px] text-muted-foreground"> days</span>
+                <p className="font-mono text-lg font-bold tracking-wider text-[hsl(var(--status-danger))]">
+                  {countdown.totalDays}<span className="text-[10px] opacity-70"> days</span>
                 </p>
                 {countdown.weeks > 0 && (
-                  <p className="font-mono text-xs text-muted-foreground">
+                  <p className="font-mono text-xs text-[hsl(var(--status-danger))] opacity-80">
                     {countdown.weeks}<span className="text-[9px]">w </span>
                     {countdown.remainingDays}<span className="text-[9px]">d</span>
                   </p>
