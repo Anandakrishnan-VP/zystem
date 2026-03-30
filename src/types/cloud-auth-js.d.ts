@@ -1,0 +1,36 @@
+export type OAuthProvider = "google" | "apple" | "microsoft";
+
+interface LovableAuthConfig {
+    oauthBrokerUrl?: string;
+    supportedOAuthOrigins?: string[];
+}
+
+interface OAuthTokens {
+    access_token: string;
+    refresh_token: string;
+}
+
+interface SignInWithOAuthOptions {
+    redirect_uri?: string;
+    extraParams?: Record<string, string>;
+}
+
+type SignInWithOAuthResult = {
+    tokens: OAuthTokens;
+    error: null;
+    redirected?: false;
+} | {
+    tokens?: undefined;
+    error: Error;
+    redirected?: false;
+} | {
+    tokens?: undefined;
+    error: null;
+    redirected: true;
+};
+
+interface LovableAuth {
+    signInWithOAuth: (provider: OAuthProvider, opts?: SignInWithOAuthOptions) => Promise<SignInWithOAuthResult>;
+}
+
+export declare function createLovableAuth(config?: LovableAuthConfig): LovableAuth;
