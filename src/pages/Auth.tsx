@@ -150,7 +150,7 @@ const Auth = () => {
                 />
               </div>
               {error && <p className="font-mono text-xs text-destructive">{error}</p>}
-              {success && <p className="font-mono text-xs text-green-500">{success}</p>}
+              {success && <p className="font-mono text-xs text-primary">{success}</p>}
               <button
                 type="submit"
                 disabled={loading}
@@ -194,7 +194,7 @@ const Auth = () => {
               />
             </div>
             {error && <p className="font-mono text-xs text-destructive">{error}</p>}
-            {success && <p className="font-mono text-xs text-green-500">{success}</p>}
+            {success && <p className="font-mono text-xs text-primary">{success}</p>}
             <button
               type="submit"
               disabled={loading}
