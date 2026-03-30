@@ -19,6 +19,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@lovable.dev/cloud-auth-js": [
+        "./src/types/cloud-auth-js.d.ts"
       ]
     },
     "skipLibCheck": true,
