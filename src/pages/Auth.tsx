@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { lovable } from '@/integrations/lovable/index';
+import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 
 const authSchema = z.object({
@@ -9,22 +10,35 @@ const authSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters')
 });
 
+type AuthView = 'login' | 'signup' | 'forgot-password' | 'reset-password';
+
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [view, setView] = useState<AuthView>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showVerification, setShowVerification] = useState(false);
   
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
+    if (user && view !== 'reset-password') {
       navigate('/');
     }
-  }, [user, navigate]);
+  }, [user, navigate, view]);
+
+  // Check for password recovery event
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setView('reset-password');
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleGoogleSignIn = async () => {
     setError('');
@@ -46,28 +60,29 @@ const Auth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
-    const validation = authSchema.safeParse({ email, password });
-    if (!validation.success) {
-      setError(validation.error.errors[0].message);
-      setLoading(false);
-      return;
+    if (view === 'login' || view === 'signup') {
+      const validation = authSchema.safeParse({ email, password });
+      if (!validation.success) {
+        setError(validation.error.errors[0].message);
+        setLoading(false);
+        return;
+      }
     }
 
     try {
-      if (isLogin) {
+      if (view === 'login') {
         const { error } = await signIn(email, password);
         if (error) {
-          if (error.message.includes('Email not confirmed')) {
-            setError('Please verify your email before signing in. Check your inbox.');
-          } else if (error.message.includes('Invalid login credentials')) {
+          if (error.message.includes('Invalid login credentials')) {
             setError('Invalid email or password');
           } else {
             setError(error.message);
           }
         }
-      } else {
+      } else if (view === 'signup') {
         const { error } = await signUp(email, password);
         if (error) {
           if (error.message.includes('User already registered')) {
@@ -75,8 +90,33 @@ const Auth = () => {
           } else {
             setError(error.message);
           }
+        }
+      } else if (view === 'forgot-password') {
+        if (!email) {
+          setError('Please enter your email');
+          setLoading(false);
+          return;
+        }
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth`
+        });
+        if (error) {
+          setError(error.message);
         } else {
-          setShowVerification(true);
+          setSuccess('Password reset link sent! Check your inbox.');
+        }
+      } else if (view === 'reset-password') {
+        if (newPassword.length < 6) {
+          setError('Password must be at least 6 characters');
+          setLoading(false);
+          return;
+        }
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) {
+          setError(error.message);
+        } else {
+          setSuccess('Password updated successfully! Redirecting...');
+          setTimeout(() => navigate('/'), 2000);
         }
       }
     } catch (err) {
@@ -86,29 +126,87 @@ const Auth = () => {
     }
   };
 
-  if (showVerification) {
+  // Reset password view
+  if (view === 'reset-password') {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6">
-        <div className="w-full max-w-sm text-center">
+        <div className="w-full max-w-sm">
           <div className="border border-foreground p-8">
-            <div className="text-4xl mb-4">📧</div>
-            <h1 className="font-mono text-lg font-bold uppercase tracking-widest mb-4">
-              Check Your Email
+            <h1 className="font-mono text-lg font-bold uppercase tracking-widest mb-6 text-center">
+              Set New Password
             </h1>
-            <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-6">
-              We sent a verification link to
-            </p>
-            <p className="font-mono text-sm font-bold mb-6 break-all">{email}</p>
-            <p className="font-mono text-xs text-muted-foreground mb-8">
-              Click the link in your email to verify your account, then come back and sign in.
-            </p>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="font-mono text-xs uppercase tracking-wider block mb-2">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full bg-background border border-foreground px-3 py-2 font-mono text-sm"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+              {error && <p className="font-mono text-xs text-destructive">{error}</p>}
+              {success && <p className="font-mono text-xs text-primary">{success}</p>}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full border border-foreground bg-foreground text-background px-4 py-3 font-mono text-sm uppercase tracking-wider hover:bg-background hover:text-foreground disabled:opacity-50"
+              >
+                {loading ? 'Updating...' : 'Update Password'}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Forgot password view
+  if (view === 'forgot-password') {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6">
+        <div className="w-full max-w-sm">
+          <div className="flex flex-col items-center mb-12">
+            <img src="/logo.png" alt="Zystem" className="w-16 h-16 mb-4" />
+            <h1 className="font-mono text-lg font-bold uppercase tracking-widest text-center">
+              Zystem
+            </h1>
+          </div>
+          <h2 className="font-mono text-sm font-semibold uppercase tracking-widest mb-8">
+            Reset Password
+          </h2>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="font-mono text-xs uppercase tracking-wider block mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-background border border-foreground px-3 py-2 font-mono text-sm"
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+            {error && <p className="font-mono text-xs text-destructive">{error}</p>}
+            {success && <p className="font-mono text-xs text-primary">{success}</p>}
             <button
-              onClick={() => {
-                setShowVerification(false);
-                setIsLogin(true);
-                setPassword('');
-              }}
-              className="w-full border border-foreground bg-foreground text-background px-4 py-3 font-mono text-sm uppercase tracking-wider hover:bg-background hover:text-foreground"
+              type="submit"
+              disabled={loading}
+              className="w-full border border-foreground bg-foreground text-background px-4 py-3 font-mono text-sm uppercase tracking-wider hover:bg-background hover:text-foreground disabled:opacity-50"
+            >
+              {loading ? 'Sending...' : 'Send Reset Link'}
+            </button>
+          </form>
+          <div className="mt-8 text-center">
+            <button
+              onClick={() => { setView('login'); setError(''); setSuccess(''); }}
+              className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
             >
               Back to Sign In
             </button>
@@ -118,6 +216,7 @@ const Auth = () => {
     );
   }
 
+  // Login / Signup view
   return (
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
@@ -132,7 +231,7 @@ const Auth = () => {
         </div>
 
         <h2 className="font-mono text-sm font-semibold uppercase tracking-widest mb-8">
-          {isLogin ? 'Sign In' : 'Create Account'}
+          {view === 'login' ? 'Sign In' : 'Create Account'}
         </h2>
 
         {/* Google Sign In */}
@@ -197,25 +296,30 @@ const Auth = () => {
             disabled={loading}
             className="w-full border border-foreground bg-foreground text-background px-4 py-3 font-mono text-sm uppercase tracking-wider hover:bg-background hover:text-foreground disabled:opacity-50"
           >
-            {loading ? 'Loading...' : isLogin ? 'Sign In' : 'Sign Up'}
+            {loading ? 'Loading...' : view === 'login' ? 'Sign In' : 'Sign Up'}
           </button>
         </form>
 
-        {!isLogin && (
-          <p className="mt-4 font-mono text-[10px] uppercase tracking-wider text-muted-foreground text-center">
-            You'll receive a verification email after signing up
-          </p>
+        {view === 'login' && (
+          <div className="mt-4 text-center">
+            <button
+              onClick={() => { setView('forgot-password'); setError(''); }}
+              className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            >
+              Forgot Password?
+            </button>
+          </div>
         )}
 
-        <div className="mt-8 text-center">
+        <div className="mt-6 text-center">
           <button
             onClick={() => {
-              setIsLogin(!isLogin);
+              setView(view === 'login' ? 'signup' : 'login');
               setError('');
             }}
             className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
           >
-            {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+            {view === 'login' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
           </button>
         </div>
 
