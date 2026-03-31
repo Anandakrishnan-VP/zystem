@@ -399,6 +399,36 @@ export type Database = {
         }
         Relationships: []
       }
+      water_intake: {
+        Row: {
+          bottles_drunk: number
+          created_at: string
+          id: string
+          intake_date: string
+          target_bottles: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bottles_drunk?: number
+          created_at?: string
+          id?: string
+          intake_date?: string
+          target_bottles?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bottles_drunk?: number
+          created_at?: string
+          id?: string
+          intake_date?: string
+          target_bottles?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

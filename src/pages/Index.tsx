@@ -13,6 +13,7 @@ import { DeadlineReminder } from '@/components/DeadlineReminder';
 import { UserAvatar } from '@/components/UserAvatar';
 import { BodyMetricsPanel } from '@/components/BodyMetrics';
 import { MuscleTracker } from '@/components/MuscleTracker';
+import { WaterIntakeTracker } from '@/components/WaterIntakeTracker';
 import { useHabitData } from '@/hooks/useHabitData';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
@@ -155,6 +156,11 @@ const Index = () => {
             
             {/* Deadline Reminders - below calendar */}
             <DeadlineReminder todos={data.todos} />
+            
+            {/* Water Intake Tracker */}
+            <div className="mt-6">
+              <WaterIntakeTracker />
+            </div>
           </div>
           
           {/* Right side - Streak Counter + Radar Chart */}
