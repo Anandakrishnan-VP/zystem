@@ -156,6 +156,11 @@ const Index = () => {
             
             {/* Deadline Reminders - below calendar */}
             <DeadlineReminder todos={data.todos} />
+            
+            {/* Water Intake Tracker */}
+            <div className="mt-6">
+              <WaterIntakeTracker />
+            </div>
           </div>
           
           {/* Right side - Streak Counter + Radar Chart */}
