@@ -90,6 +90,13 @@ const Index = () => {
               </span>
             </div>
             <button
+              onClick={() => navigate('/friends')}
+              className="border border-foreground p-2 hover:bg-foreground hover:text-background transition-colors"
+              title="Friends"
+            >
+              <Users size={16} />
+            </button>
+            <button
               onClick={() => navigate('/libraries')}
               className="border border-foreground p-2 hover:bg-foreground hover:text-background transition-colors"
               title="Libraries"
