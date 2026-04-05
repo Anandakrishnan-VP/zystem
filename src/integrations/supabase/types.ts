@@ -207,6 +207,75 @@ export type Database = {
         }
         Relationships: []
       }
+      friend_codes: {
+        Row: {
+          created_at: string
+          friend_code: number
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          friend_code: number
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          friend_code?: number
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      friend_requests: {
+        Row: {
+          created_at: string
+          id: string
+          receiver_id: string
+          sender_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          receiver_id: string
+          sender_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          receiver_id?: string
+          sender_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      friendships: {
+        Row: {
+          created_at: string
+          id: string
+          user_id_1: string
+          user_id_2: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id_1: string
+          user_id_2: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id_1?: string
+          user_id_2?: string
+        }
+        Relationships: []
+      }
       habit_completions: {
         Row: {
           completed: boolean
