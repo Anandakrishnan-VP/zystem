@@ -83,6 +83,103 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_checkins: {
+        Row: {
+          challenge_id: string
+          checkin_date: string
+          completed: boolean
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          checkin_date?: string
+          completed?: boolean
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          checkin_date?: string
+          completed?: boolean
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_checkins_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_participants: {
+        Row: {
+          challenge_id: string
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_participants_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenges: {
+        Row: {
+          created_at: string
+          creator_id: string
+          description: string
+          end_date: string
+          goal: string
+          id: string
+          start_date: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          description?: string
+          end_date: string
+          goal?: string
+          id?: string
+          start_date: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          description?: string
+          end_date?: string
+          goal?: string
+          id?: string
+          start_date?: string
+          title?: string
+        }
+        Relationships: []
+      }
       countdown_targets: {
         Row: {
           created_at: string
@@ -107,6 +204,75 @@ export type Database = {
           target_date?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      friend_codes: {
+        Row: {
+          created_at: string
+          friend_code: number
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          friend_code: number
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          friend_code?: number
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      friend_requests: {
+        Row: {
+          created_at: string
+          id: string
+          receiver_id: string
+          sender_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          receiver_id: string
+          sender_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          receiver_id?: string
+          sender_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      friendships: {
+        Row: {
+          created_at: string
+          id: string
+          user_id_1: string
+          user_id_2: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id_1: string
+          user_id_2: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id_1?: string
+          user_id_2?: string
         }
         Relationships: []
       }

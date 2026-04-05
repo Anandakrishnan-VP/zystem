@@ -10,6 +10,7 @@ import ProfileSetup from "./pages/ProfileSetup";
 import Settings from "./pages/Settings";
 import Notes from "./pages/Notes";
 import Libraries from "./pages/Libraries";
+import Friends from "./pages/Friends";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/notes" element={<Notes />} />
             <Route path="/libraries" element={<Libraries />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/friends" element={<Friends />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
