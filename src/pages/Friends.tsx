@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useFriends, Friend } from '@/hooks/useFriends';
 import { UserAvatar } from '@/components/UserAvatar';
 import { useToast } from '@/hooks/use-toast';
+import ChallengeCard from '@/components/ChallengeCard';
 
 const Friends = () => {
   const { user, loading: authLoading } = useAuth();
