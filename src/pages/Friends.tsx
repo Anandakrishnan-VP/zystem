@@ -226,11 +226,11 @@ const Friends = () => {
           )}
         </section>
 
-        {/* Challenges */}
+        {/* Grow Together - Challenges */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-mono text-sm font-bold uppercase tracking-widest flex items-center gap-2">
-              <Trophy size={16} /> Challenges
+              <Trophy size={16} /> Grow Together
             </h2>
             <button
               onClick={() => setShowCreateChallenge(!showCreateChallenge)}
@@ -324,66 +324,18 @@ const Friends = () => {
           {/* Challenge Cards */}
           {challenges.length === 0 ? (
             <p className="font-mono text-xs text-muted-foreground">
-              No challenges yet. Create one and invite friends!
+              No challenges yet. Create one and invite friends to grow together!
             </p>
           ) : (
             <div className="space-y-4">
-              {challenges.map(c => {
-                const startDate = new Date(c.start_date);
-                const endDate = new Date(c.end_date);
-                const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-                const isActive = today >= c.start_date && today <= c.end_date;
-                const hasCheckedInToday = c.participants?.find(p => p.user_id === user?.id)?.checkins?.includes(today);
-
-                return (
-                  <div key={c.id} className="border border-foreground p-5">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="font-mono text-sm font-bold">{c.title}</h3>
-                        <p className="font-mono text-xs text-muted-foreground mt-1">{c.goal}</p>
-                        {c.description && (
-                          <p className="font-mono text-xs text-muted-foreground mt-1">{c.description}</p>
-                        )}
-                      </div>
-                      {isActive && !hasCheckedInToday && (
-                        <button
-                          onClick={() => checkinChallenge(c.id)}
-                          className="border border-primary bg-primary text-primary-foreground px-4 py-2 font-mono text-xs uppercase tracking-wider hover:opacity-90 transition-opacity"
-                        >
-                          Check In
-                        </button>
-                      )}
-                      {hasCheckedInToday && (
-                        <span className="font-mono text-xs text-primary uppercase">✓ Done Today</span>
-                      )}
-                    </div>
-                    
-                    <p className="font-mono text-xs text-muted-foreground mb-3">
-                      {c.start_date} → {c.end_date} · {totalDays} days
-                    </p>
-
-                    {/* Participants Progress */}
-                    <div className="space-y-2">
-                      {c.participants?.map(p => {
-                        const checkinCount = p.checkins?.length || 0;
-                        const pct = Math.round((checkinCount / totalDays) * 100);
-                        return (
-                          <div key={p.user_id} className="flex items-center gap-3">
-                            <span className="font-mono text-xs w-24 truncate">{p.username}</span>
-                            <div className="flex-1 bg-muted h-3 relative">
-                              <div
-                                className="h-full bg-primary transition-all"
-                                style={{ width: `${pct}%` }}
-                              />
-                            </div>
-                            <span className="font-mono text-xs w-16 text-right">{checkinCount}/{totalDays}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
+              {challenges.map(c => (
+                <ChallengeCard
+                  key={c.id}
+                  challenge={c}
+                  currentUserId={user?.id || ''}
+                  onCheckin={checkinChallenge}
+                />
+              ))}
             </div>
           )}
         </section>
