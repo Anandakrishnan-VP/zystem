@@ -329,12 +329,13 @@ const Friends = () => {
           ) : (
             <div className="space-y-4">
               {challenges.map(c => (
-                <ChallengeCard
-                  key={c.id}
-                  challenge={c}
-                  currentUserId={user?.id || ''}
-                  onCheckin={checkinChallenge}
-                />
+                <div key={c.id} onClick={() => navigate(`/challenge/${c.id}`)} className="cursor-pointer">
+                  <ChallengeCard
+                    challenge={c}
+                    currentUserId={user?.id || ''}
+                    onCheckin={(cid) => { /* prevent nav */ checkinChallenge(cid); }}
+                  />
+                </div>
               ))}
             </div>
           )}

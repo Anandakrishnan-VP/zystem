@@ -11,6 +11,7 @@ import Settings from "./pages/Settings";
 import Notes from "./pages/Notes";
 import Libraries from "./pages/Libraries";
 import Friends from "./pages/Friends";
+import ChallengeDetail from "./pages/ChallengeDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/libraries" element={<Libraries />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/friends" element={<Friends />} />
+            <Route path="/challenge/:id" element={<ChallengeDetail />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
