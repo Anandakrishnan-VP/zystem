@@ -63,13 +63,24 @@ const Friends = () => {
       toast({ title: 'Error', description: 'Fill all required fields', variant: 'destructive' });
       return;
     }
-    await createChallenge(
+
+    const result = await createChallenge(
       challengeForm.title, challengeForm.description, challengeForm.goal,
       challengeForm.startDate, challengeForm.endDate, challengeForm.invitees
     );
+
+    if (result?.error) {
+      toast({ title: 'Error', description: result.error, variant: 'destructive' });
+      return;
+    }
+
     setShowCreateChallenge(false);
     setChallengeForm({ title: '', description: '', goal: '', startDate: '', endDate: '', invitees: [] });
     toast({ title: 'Challenge Created!' });
+
+    if (result?.challengeId) {
+      navigate(`/challenge/${result.challengeId}`);
+    }
   };
 
   const toggleInvitee = (userId: string) => {

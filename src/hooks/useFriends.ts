@@ -161,44 +161,90 @@ export const useFriends = () => {
   const fetchChallenges = useCallback(async () => {
     if (!user) return;
 
-    const { data: myParticipations } = await supabase
-      .from('challenge_participants')
-      .select('challenge_id')
-      .eq('user_id', user.id);
+    const [createdChallengesRes, participationsRes] = await Promise.all([
+      supabase
+        .from('challenges')
+        .select('*')
+        .eq('creator_id', user.id),
+      supabase
+        .from('challenge_participants')
+        .select('challenge_id')
+        .eq('user_id', user.id),
+    ]);
 
-    if (!myParticipations?.length) {
+    if (createdChallengesRes.error) {
+      console.error('Failed to fetch created challenges', createdChallengesRes.error);
+    }
+
+    if (participationsRes.error) {
+      console.error('Failed to fetch challenge participations', participationsRes.error);
+    }
+
+    const challengeIds = [
+      ...(createdChallengesRes.data?.map(challenge => challenge.id) || []),
+      ...(participationsRes.data?.map(participation => participation.challenge_id) || []),
+    ];
+
+    const uniqueChallengeIds = [...new Set(challengeIds)];
+
+    if (!uniqueChallengeIds.length) {
       setChallenges([]);
       return;
     }
 
-    const challengeIds = myParticipations.map(p => p.challenge_id);
-    const { data: challengeData } = await supabase
+    const { data: challengeData, error: challengeDataError } = await supabase
       .from('challenges')
       .select('*')
-      .in('id', challengeIds);
+      .in('id', uniqueChallengeIds);
+
+    if (challengeDataError) {
+      console.error('Failed to fetch challenge data', challengeDataError);
+      setChallenges([]);
+      return;
+    }
 
     if (!challengeData?.length) {
       setChallenges([]);
       return;
     }
 
-    // Get all participants for these challenges
-    const { data: allParticipants } = await supabase
-      .from('challenge_participants')
-      .select('*')
-      .in('challenge_id', challengeIds);
+    const [participantsRes, checkinsRes] = await Promise.all([
+      supabase
+        .from('challenge_participants')
+        .select('*')
+        .in('challenge_id', uniqueChallengeIds),
+      supabase
+        .from('challenge_checkins')
+        .select('*')
+        .in('challenge_id', uniqueChallengeIds),
+    ]);
+
+    if (participantsRes.error) {
+      console.error('Failed to fetch challenge participants', participantsRes.error);
+    }
+
+    if (checkinsRes.error) {
+      console.error('Failed to fetch challenge checkins', checkinsRes.error);
+    }
+
+    const allParticipants = participantsRes.data || [];
+    const allCheckins = checkinsRes.data || [];
 
     const participantUserIds = [...new Set(allParticipants?.map(p => p.user_id) || [])];
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('user_id, username, avatar_url')
-      .in('user_id', participantUserIds);
+    let profiles: Array<{ user_id: string; username: string | null; avatar_url: string | null }> = [];
 
-    // Get all checkins
-    const { data: allCheckins } = await supabase
-      .from('challenge_checkins')
-      .select('*')
-      .in('challenge_id', challengeIds);
+    if (participantUserIds.length) {
+      const { data: profileData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, username, avatar_url')
+        .in('user_id', participantUserIds);
+
+      if (profilesError) {
+        console.error('Failed to fetch challenge participant profiles', profilesError);
+      }
+
+      profiles = profileData || [];
+    }
 
     const enrichedChallenges: Challenge[] = challengeData.map(c => ({
       ...c,
@@ -218,7 +264,11 @@ export const useFriends = () => {
         }),
     }));
 
-    setChallenges(enrichedChallenges);
+    setChallenges(
+      enrichedChallenges.sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+    );
   }, [user]);
 
   const fetchAll = useCallback(async () => {
@@ -302,7 +352,7 @@ export const useFriends = () => {
     endDate: string,
     inviteFriendIds: string[]
   ) => {
-    if (!user) return;
+    if (!user) return { error: 'Not logged in' };
 
     const { data: challenge, error } = await supabase
       .from('challenges')
@@ -310,27 +360,51 @@ export const useFriends = () => {
       .select()
       .single();
 
-    if (error || !challenge) return;
+    if (error || !challenge) {
+      return { error: error?.message || 'Could not create challenge' };
+    }
 
-    // Add creator as participant
-    const participants = [
-      { challenge_id: challenge.id, user_id: user.id },
-      ...inviteFriendIds.map(fid => ({ challenge_id: challenge.id, user_id: fid })),
-    ];
+    const { error: creatorParticipantError } = await supabase
+      .from('challenge_participants')
+      .insert({ challenge_id: challenge.id, user_id: user.id });
 
-    await supabase.from('challenge_participants').insert(participants);
+    if (creatorParticipantError) {
+      console.error('Failed to add creator to challenge', creatorParticipantError);
+      await fetchChallenges();
+      return { error: creatorParticipantError.message };
+    }
+
+    for (const friendId of inviteFriendIds) {
+      const { error: inviteError } = await supabase
+        .from('challenge_participants')
+        .insert({ challenge_id: challenge.id, user_id: friendId });
+
+      if (inviteError) {
+        console.error(`Failed to invite user ${friendId} to challenge`, inviteError);
+        await fetchChallenges();
+        return { error: inviteError.message };
+      }
+    }
+
     await fetchChallenges();
+    return { error: null, challengeId: challenge.id };
   };
 
   const checkinChallenge = async (challengeId: string) => {
-    if (!user) return;
+    if (!user) return { error: 'Not logged in' };
     const today = new Date().toISOString().split('T')[0];
     
-    await supabase
+    const { error } = await supabase
       .from('challenge_checkins')
       .insert({ challenge_id: challengeId, user_id: user.id, checkin_date: today });
 
+    if (error && !error.message.toLowerCase().includes('duplicate')) {
+      console.error('Failed to check in to challenge', error);
+      return { error: error.message };
+    }
+
     await fetchChallenges();
+    return { error: null };
   };
 
   const getFriendStreak = async (friendUserId: string) => {
