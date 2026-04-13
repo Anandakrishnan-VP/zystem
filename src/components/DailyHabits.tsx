@@ -154,11 +154,6 @@ export const DailyHabits = ({
                       Future
                     </span>
                   )}
-                  {isPast && (
-                    <span className="font-mono text-xs text-muted-foreground">
-                      🔒 Locked
-                    </span>
-                  )}
                   {totalHabits === 0 && (
                     <span className="font-mono text-xs text-muted-foreground">
                       No habits
@@ -179,10 +174,10 @@ export const DailyHabits = ({
                         return (
                           <li key={habit.id} className="flex items-center gap-3">
                             <button
-                              onClick={() => !isPast && !isFuture && onToggle(habit.id, dateForDay)}
-                              disabled={isPast || isFuture}
-                              className={`habit-checkbox flex-shrink-0 ${isChecked ? 'checked' : ''} ${isPast || isFuture ? 'opacity-50 cursor-not-allowed' : ''}`}
-                              aria-label={`${habit.name}${isChecked ? ' - completed' : ' - missed'}${isPast ? ' (locked)' : ''}`}
+                              onClick={() => !isFuture && onToggle(habit.id, dateForDay)}
+                              disabled={isFuture}
+                              className={`habit-checkbox flex-shrink-0 ${isChecked ? 'checked' : ''} ${isFuture ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              aria-label={`${habit.name}${isChecked ? ' - completed' : ' - missed'}${isFuture ? ' (future)' : ''}`}
                             />
                             
                             {isEditing ? (
