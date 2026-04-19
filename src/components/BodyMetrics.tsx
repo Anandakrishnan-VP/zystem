@@ -231,10 +231,16 @@ export const BodyMetricsPanel = () => {
         </div>
       ) : (
         <div className="p-4">
-          <div className="flex gap-6">
-            {/* Human figure */}
-            <div className="w-28 flex-shrink-0">
-              <HumanFigure bmi={bmi} bodyFat={bodyFat} sex={metrics.sex} />
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* 3D Anatomical body */}
+            <div className="w-full md:w-48 h-72 md:h-80 flex-shrink-0 bg-muted/20 border border-foreground/10 rounded-sm overflow-hidden">
+              <Body3D
+                bmi={bmi}
+                bodyFat={bodyFat}
+                sex={metrics.sex}
+                muscleCounts={getMuscleCounts()}
+                highlightToday={isTodayTrained}
+              />
             </div>
 
             {/* Stats */}
