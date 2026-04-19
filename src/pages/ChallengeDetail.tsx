@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Plus, Check, Trash2, Flame, Trophy } from 'lucide-react';
+import { ArrowLeft, Plus, Check, Trash2, Flame, Trophy, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserAvatar } from '@/components/UserAvatar';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useFriends } from '@/hooks/useFriends';
 
 interface Participant {
   user_id: string;
@@ -39,6 +40,7 @@ const ChallengeDetail = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { deleteChallenge, leaveChallenge } = useFriends();
 
   const [challenge, setChallenge] = useState<ChallengeData | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -192,6 +194,32 @@ const ChallengeDetail = () => {
     );
   }
 
+  const isCreator = challenge.creator_id === user?.id;
+
+  const handleDelete = async () => {
+    if (!id) return;
+    if (!confirm('Delete this challenge for everyone? This cannot be undone.')) return;
+    const res = await deleteChallenge(id);
+    if (res.error) {
+      toast({ title: 'Error', description: res.error, variant: 'destructive' });
+    } else {
+      toast({ title: 'Challenge deleted' });
+      navigate('/friends');
+    }
+  };
+
+  const handleLeave = async () => {
+    if (!id) return;
+    if (!confirm('Leave this challenge? Your progress here will be hidden.')) return;
+    const res = await leaveChallenge(id);
+    if (res.error) {
+      toast({ title: 'Error', description: res.error, variant: 'destructive' });
+    } else {
+      toast({ title: 'Left challenge' });
+      navigate('/friends');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-foreground">
@@ -200,7 +228,24 @@ const ChallengeDetail = () => {
             <ArrowLeft size={16} />
           </button>
           <Trophy size={20} />
-          <h1 className="font-mono text-lg font-bold uppercase tracking-widest truncate">{challenge.title}</h1>
+          <h1 className="font-mono text-lg font-bold uppercase tracking-widest truncate flex-1">{challenge.title}</h1>
+          {isCreator ? (
+            <button
+              onClick={handleDelete}
+              className="border border-destructive text-destructive p-2 hover:bg-destructive hover:text-destructive-foreground transition-colors"
+              title="Delete challenge"
+            >
+              <Trash2 size={16} />
+            </button>
+          ) : (
+            <button
+              onClick={handleLeave}
+              className="border border-foreground p-2 hover:bg-foreground hover:text-background transition-colors"
+              title="Leave challenge"
+            >
+              <LogOut size={16} />
+            </button>
+          )}
         </div>
       </header>
 

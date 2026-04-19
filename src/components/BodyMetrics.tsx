@@ -7,8 +7,10 @@ import {
   getBMICategory,
   getBodyFatCategory,
 } from '@/hooks/useBodyMetrics';
+import { useMuscleTraining } from '@/hooks/useMuscleTraining';
+import { Body3D } from './Body3D';
 
-// Geometric human figure SVG that morphs based on BMI/body fat
+// Legacy 2D figure (kept as fallback)
 const HumanFigure = ({ bmi, bodyFat, sex }: { bmi: number | null; bodyFat: number | null; sex: 'male' | 'female' }) => {
   // Scale factor based on BMI (18.5-35 range mapped to 0.7-1.4)
   const scale = bmi ? Math.min(1.4, Math.max(0.7, (bmi - 10) / 18)) : 1;
@@ -96,6 +98,7 @@ const HumanFigure = ({ bmi, bodyFat, sex }: { bmi: number | null; bodyFat: numbe
 
 export const BodyMetricsPanel = () => {
   const { metrics, loading, saveMetrics } = useBodyMetrics();
+  const { getMuscleCounts, isTodayTrained } = useMuscleTraining();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
     height_cm: '',
@@ -228,10 +231,16 @@ export const BodyMetricsPanel = () => {
         </div>
       ) : (
         <div className="p-4">
-          <div className="flex gap-6">
-            {/* Human figure */}
-            <div className="w-28 flex-shrink-0">
-              <HumanFigure bmi={bmi} bodyFat={bodyFat} sex={metrics.sex} />
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* 3D Anatomical body */}
+            <div className="w-full md:w-48 h-72 md:h-80 flex-shrink-0 bg-muted/20 border border-foreground/10 rounded-sm overflow-hidden">
+              <Body3D
+                bmi={bmi}
+                bodyFat={bodyFat}
+                sex={metrics.sex}
+                muscleCounts={getMuscleCounts()}
+                highlightToday={isTodayTrained}
+              />
             </div>
 
             {/* Stats */}
