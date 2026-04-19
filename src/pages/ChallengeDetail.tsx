@@ -40,6 +40,7 @@ const ChallengeDetail = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { deleteChallenge, leaveChallenge } = useFriends();
 
   const [challenge, setChallenge] = useState<ChallengeData | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
