@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Plus, Check, Trash2, Flame, Trophy } from 'lucide-react';
+import { ArrowLeft, Plus, Check, Trash2, Flame, Trophy, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserAvatar } from '@/components/UserAvatar';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useFriends } from '@/hooks/useFriends';
 
 interface Participant {
   user_id: string;
