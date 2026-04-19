@@ -475,6 +475,8 @@ export const useFriends = () => {
     removeFriend,
     createChallenge,
     checkinChallenge,
+    deleteChallenge,
+    leaveChallenge,
     getFriendStreak,
     refetch: fetchAll,
   };
