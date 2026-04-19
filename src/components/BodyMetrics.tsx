@@ -7,8 +7,10 @@ import {
   getBMICategory,
   getBodyFatCategory,
 } from '@/hooks/useBodyMetrics';
+import { useMuscleTraining } from '@/hooks/useMuscleTraining';
+import { Body3D } from './Body3D';
 
-// Geometric human figure SVG that morphs based on BMI/body fat
+// Legacy 2D figure (kept as fallback)
 const HumanFigure = ({ bmi, bodyFat, sex }: { bmi: number | null; bodyFat: number | null; sex: 'male' | 'female' }) => {
   // Scale factor based on BMI (18.5-35 range mapped to 0.7-1.4)
   const scale = bmi ? Math.min(1.4, Math.max(0.7, (bmi - 10) / 18)) : 1;
