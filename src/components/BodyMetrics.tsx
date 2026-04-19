@@ -98,6 +98,7 @@ const HumanFigure = ({ bmi, bodyFat, sex }: { bmi: number | null; bodyFat: numbe
 
 export const BodyMetricsPanel = () => {
   const { metrics, loading, saveMetrics } = useBodyMetrics();
+  const { getMuscleCounts, isTodayTrained } = useMuscleTraining();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
     height_cm: '',
