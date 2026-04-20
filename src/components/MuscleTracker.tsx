@@ -1,4 +1,6 @@
 import { useMuscleTraining, MUSCLE_GROUPS, MUSCLE_LABELS, MuscleGroup, TimeRange } from '@/hooks/useMuscleTraining';
+import { useBodyMetrics, calculateBMI, calculateBodyFat } from '@/hooks/useBodyMetrics';
+import { MuscleBody3D } from './MuscleBody3D';
 import { Check } from 'lucide-react';
 
 // Color scale: purple (most) → gold → green → red (least but trained)
@@ -112,6 +114,12 @@ const TIME_RANGE_LABELS: Record<TimeRange, string> = {
 
 export const MuscleTracker = () => {
   const { loading, toggleMuscle, getMuscleCounts, isTodayTrained, timeRange, setTimeRange } = useMuscleTraining();
+  const { metrics } = useBodyMetrics();
+  const sex: 'male' | 'female' = metrics?.sex ?? 'male';
+  const bmi = metrics ? calculateBMI(metrics.weight_kg, metrics.height_cm) : null;
+  const bodyFat = metrics && metrics.waist_cm && metrics.neck_cm
+    ? calculateBodyFat(metrics.sex, metrics.waist_cm, metrics.neck_cm, metrics.height_cm, metrics.hip_cm || undefined)
+    : null;
 
   if (loading) {
     return (
@@ -158,13 +166,25 @@ export const MuscleTracker = () => {
         </div>
       </div>
 
-      {/* Diagrams - Front & Back side by side, large */}
-      <div className="p-4 flex justify-center gap-2">
-        <div className="w-1/2 max-w-[220px]">
-          <FrontDiagram counts={counts} maxCount={maxCount} />
+      {/* 3D realistic body + Front/Back SVGs */}
+      <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-4 items-center">
+        <div className="lg:col-span-1 h-[420px] bg-muted/20 border border-foreground/10 rounded-sm overflow-hidden">
+          <MuscleBody3D
+            sex={sex}
+            bmi={bmi}
+            bodyFat={bodyFat}
+            muscleCounts={counts}
+            maxCount={maxCount}
+            isTodayTrained={isTodayTrained}
+          />
         </div>
-        <div className="w-1/2 max-w-[220px]">
-          <BackDiagram counts={counts} maxCount={maxCount} />
+        <div className="lg:col-span-2 flex justify-center gap-2">
+          <div className="w-1/2 max-w-[220px]">
+            <FrontDiagram counts={counts} maxCount={maxCount} />
+          </div>
+          <div className="w-1/2 max-w-[220px]">
+            <BackDiagram counts={counts} maxCount={maxCount} />
+          </div>
         </div>
       </div>
 

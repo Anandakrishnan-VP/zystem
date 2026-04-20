@@ -7,8 +7,7 @@ import {
   getBMICategory,
   getBodyFatCategory,
 } from '@/hooks/useBodyMetrics';
-import { useMuscleTraining } from '@/hooks/useMuscleTraining';
-import { Body3D } from './Body3D';
+import { AnatomicalBody } from './AnatomicalBody';
 
 // Legacy 2D figure (kept as fallback)
 const HumanFigure = ({ bmi, bodyFat, sex }: { bmi: number | null; bodyFat: number | null; sex: 'male' | 'female' }) => {
@@ -98,7 +97,6 @@ const HumanFigure = ({ bmi, bodyFat, sex }: { bmi: number | null; bodyFat: numbe
 
 export const BodyMetricsPanel = () => {
   const { metrics, loading, saveMetrics } = useBodyMetrics();
-  const { getMuscleCounts, isTodayTrained } = useMuscleTraining();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
     height_cm: '',
@@ -233,13 +231,14 @@ export const BodyMetricsPanel = () => {
         <div className="p-4">
           <div className="flex flex-col md:flex-row gap-6">
             {/* 3D Anatomical body */}
-            <div className="w-full md:w-48 h-72 md:h-80 flex-shrink-0 bg-muted/20 border border-foreground/10 rounded-sm overflow-hidden">
-              <Body3D
+            <div className="w-full md:w-56 h-80 md:h-96 flex-shrink-0 bg-muted/20 border border-foreground/10 rounded-sm overflow-hidden">
+              <AnatomicalBody
                 bmi={bmi}
                 bodyFat={bodyFat}
                 sex={metrics.sex}
-                muscleCounts={getMuscleCounts()}
-                highlightToday={isTodayTrained}
+                heightCm={metrics.height_cm}
+                waistCm={metrics.waist_cm}
+                hipCm={metrics.hip_cm}
               />
             </div>
 
