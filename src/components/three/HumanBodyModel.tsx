@@ -237,7 +237,7 @@ export function HumanBodyModel({ shape, visual, autoRotate = true }: Props) {
       <Limb position={[0, neckY, 0]} radius={0.16} length={0.28} color={skin} />
 
       {/* Traps */}
-      <Bulge pos={[-0.18, neckY - 0.05, -0.05]} mg="traps" visual={visual} baseSkin={skin} defMult={muscleDef}
+      <Bulge mg="traps" visual={visual} baseSkin={skin} defMult={muscleDef}
         scale={[0.18, 0.1, 0.16]} position={[-0.18, neckY - 0.05, -0.05]}
       />
       <Bulge mg="traps" visual={visual} baseSkin={skin} defMult={muscleDef}
