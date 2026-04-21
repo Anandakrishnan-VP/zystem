@@ -1,18 +1,13 @@
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import type { MuscleGroup } from '@/hooks/useMuscleTraining';
 
 export interface BodyShape {
   sex: 'male' | 'female';
-  /** girth multiplier for torso/limbs (~0.8 lean → 1.4 heavy) */
-  girth: number;
-  /** muscle definition multiplier (0.85 soft → 1.3 ripped) */
-  muscleDef: number;
-  /** overall height scale (~0.9 short → 1.1 tall) */
-  heightScale: number;
-  /** waist relative to hips (1.0 = even, lower = narrower waist) */
-  waistRatio: number;
+  girth: number;        // 0.78 lean → 1.45 heavy
+  muscleDef: number;    // 0.85 soft → 1.3 ripped
+  heightScale: number;  // 0.88 short → 1.12 tall
+  waistRatio: number;   // waist/hip ratio
 }
 
 export function computeBodyShape({
@@ -37,441 +32,323 @@ export function computeBodyShape({
     ? Math.min(1.3, Math.max(0.85, (28 - bodyFat) / 18 + 0.85))
     : 1;
   const heightScale = heightCm ? Math.min(1.12, Math.max(0.88, heightCm / 175)) : 1;
-  const waistRatio = waistCm && hipCm ? Math.min(1.05, Math.max(0.7, waistCm / hipCm)) : (sex === 'female' ? 0.78 : 0.92);
+  const waistRatio = waistCm && hipCm
+    ? Math.min(1.05, Math.max(0.7, waistCm / hipCm))
+    : (sex === 'female' ? 0.75 : 0.9);
   return { sex, girth, muscleDef, heightScale, waistRatio };
 }
 
+// Kept for backwards compat with existing imports — body model no longer
+// reads any visual state; muscle highlighting is handled by the 2D SVG tracker.
 export interface MuscleVisualState {
-  /** count → intensity (0..1) per muscle group */
-  intensity: (mg: MuscleGroup) => number;
-  /** is this muscle trained today? */
-  isToday: (mg: MuscleGroup) => boolean;
-  /** ratio for heatmap mode (count/maxCount) */
-  ratio?: (mg: MuscleGroup) => number;
-  /** color mode: 'heat' uses purple/gold/green/red, 'training' uses skin→red */
+  intensity: (mg: any) => number;
+  isToday: (mg: any) => boolean;
+  ratio?: (mg: any) => number;
   mode: 'heat' | 'training' | 'none';
 }
 
 const SKIN_MALE = '#d6a888';
-const SKIN_FEMALE = '#e6b9a0';
-
-function heatColor(ratio: number): THREE.Color {
-  if (ratio >= 0.75) return new THREE.Color('#a855f7'); // purple
-  if (ratio >= 0.5) return new THREE.Color('#eab308');  // gold
-  if (ratio >= 0.25) return new THREE.Color('#22c55e'); // green
-  if (ratio > 0) return new THREE.Color('#ef4444');     // red
-  return new THREE.Color(0); // sentinel
-}
-
-function getMuscleColor(
-  mg: MuscleGroup,
-  visual: MuscleVisualState | undefined,
-  baseSkin: string,
-): { color: THREE.Color; emissive: THREE.Color; emissiveIntensity: number; bulgeBoost: number } {
-  const baseColor = new THREE.Color(baseSkin);
-  if (!visual || visual.mode === 'none') {
-    return { color: baseColor, emissive: new THREE.Color(0), emissiveIntensity: 0, bulgeBoost: 0 };
-  }
-  const today = visual.isToday(mg);
-  const i = visual.intensity(mg);
-  const todayColor = new THREE.Color('#22c55e');
-
-  if (visual.mode === 'heat' && visual.ratio) {
-    const r = visual.ratio(mg);
-    const heat = heatColor(r);
-    if (r === 0 && !today) {
-      return { color: baseColor, emissive: new THREE.Color(0), emissiveIntensity: 0, bulgeBoost: 0 };
-    }
-    const blended = baseColor.clone().lerp(heat, 0.85);
-    return {
-      color: today ? todayColor : blended,
-      emissive: today ? todayColor : heat,
-      emissiveIntensity: today ? 0.55 : 0.35,
-      bulgeBoost: i,
-    };
-  }
-
-  // training mode (default)
-  const activeColor = new THREE.Color('#b85450');
-  const color = today ? todayColor : baseColor.clone().lerp(activeColor, i * 0.6);
-  return {
-    color,
-    emissive: today ? todayColor : new THREE.Color(0),
-    emissiveIntensity: today ? 0.4 : 0,
-    bulgeBoost: i,
-  };
-}
+const SKIN_FEMALE = '#e8bca3';
 
 /**
- * Capsule-based limb. Smooth & rounded — looks far more like real anatomy
- * than stretched spheres.
+ * Build a smooth torso silhouette using LatheGeometry. Profile points go
+ * from hips → waist → chest → shoulders, giving a gendered, organic curve.
  */
-function Limb({
-  position,
-  rotation = [0, 0, 0],
-  radius,
-  length,
-  color,
-  emissive,
-  emissiveIntensity = 0,
-}: {
-  position: [number, number, number];
-  rotation?: [number, number, number];
-  radius: number;
-  length: number;
-  color: THREE.Color | string;
-  emissive?: THREE.Color | string;
-  emissiveIntensity?: number;
-}) {
-  return (
-    <mesh position={position} rotation={rotation as any} castShadow receiveShadow>
-      <capsuleGeometry args={[radius, length, 8, 16]} />
-      <meshStandardMaterial
-        color={color}
-        roughness={0.55}
-        metalness={0.02}
-        emissive={emissive || '#000000'}
-        emissiveIntensity={emissiveIntensity}
-      />
-    </mesh>
-  );
+function buildTorsoProfile(shape: BodyShape): THREE.Vector2[] {
+  const { sex, girth, waistRatio } = shape;
+  const shoulderW = (sex === 'male' ? 0.95 : 0.78) * girth;
+  const chestW = (sex === 'male' ? 0.82 : 0.78) * girth;
+  const waistW = chestW * waistRatio * (sex === 'female' ? 0.85 : 0.95);
+  const hipW = (sex === 'male' ? 0.75 : 0.88) * girth;
+  const upperHipW = hipW * 0.95;
+
+  // y goes 0 (hip bottom) → 2.4 (shoulder top)
+  return [
+    new THREE.Vector2(0.02, 0.0),
+    new THREE.Vector2(hipW * 0.95, 0.05),
+    new THREE.Vector2(hipW, 0.25),       // hip widest
+    new THREE.Vector2(upperHipW, 0.55),
+    new THREE.Vector2(waistW * 1.05, 0.85),
+    new THREE.Vector2(waistW, 1.05),     // waist narrowest
+    new THREE.Vector2(waistW * 1.08, 1.25),
+    new THREE.Vector2(chestW * 0.92, 1.55),
+    new THREE.Vector2(chestW, 1.85),     // chest
+    new THREE.Vector2(chestW * 0.95, 2.05),
+    new THREE.Vector2(shoulderW * 0.85, 2.25),
+    new THREE.Vector2(shoulderW * 0.5, 2.4),
+    new THREE.Vector2(0.18, 2.45),       // neck base
+  ];
 }
 
-/** A muscle bulge laid over a limb — sphere stretched along the limb axis. */
-function Bulge({
-  position,
-  rotation = [0, 0, 0],
-  scale,
-  mg,
-  visual,
-  baseSkin,
-  defMult,
-}: {
-  position: [number, number, number];
-  rotation?: [number, number, number];
-  scale: [number, number, number];
-  mg: MuscleGroup;
-  visual?: MuscleVisualState;
-  baseSkin: string;
-  defMult: number;
-}) {
-  const { color, emissive, emissiveIntensity, bulgeBoost } = getMuscleColor(mg, visual, baseSkin);
-  const bulge = 1 + bulgeBoost * 0.22 * defMult;
+/** Build a tapered limb (arm/leg) using LatheGeometry for smooth organic shape */
+function buildLimbProfile(
+  topRadius: number,
+  midRadius: number,
+  bottomRadius: number,
+  length: number,
+): THREE.Vector2[] {
+  return [
+    new THREE.Vector2(0.01, 0),
+    new THREE.Vector2(topRadius * 0.95, 0.02 * length),
+    new THREE.Vector2(topRadius, 0.15 * length),
+    new THREE.Vector2(midRadius * 1.05, 0.4 * length),
+    new THREE.Vector2(midRadius, 0.6 * length),
+    new THREE.Vector2(bottomRadius * 1.1, 0.85 * length),
+    new THREE.Vector2(bottomRadius, length),
+    new THREE.Vector2(0.01, length + 0.01),
+  ];
+}
+
+interface SkinMatProps {
+  color: string;
+}
+function SkinMaterial({ color }: SkinMatProps) {
   return (
-    <mesh
-      position={position}
-      rotation={rotation as any}
-      scale={[scale[0] * bulge, scale[1] * bulge, scale[2] * bulge]}
-      castShadow
-    >
-      <sphereGeometry args={[1, 24, 24]} />
-      <meshStandardMaterial
-        color={color}
-        roughness={0.5}
-        metalness={0.03}
-        emissive={emissive}
-        emissiveIntensity={emissiveIntensity}
-      />
-    </mesh>
+    <meshStandardMaterial
+      color={color}
+      roughness={0.62}
+      metalness={0.02}
+      flatShading={false}
+    />
   );
 }
 
 interface Props {
   shape: BodyShape;
+  /** Kept for API back-compat; ignored. */
   visual?: MuscleVisualState;
   autoRotate?: boolean;
 }
 
 /**
- * Realistic-ish anatomical human body:
- * - Capsule limbs (smooth, no boxy joints)
- * - Gendered proportions: shoulders, hips, chest, waist
- * - Measurement-driven scaling (girth + waistRatio)
- * - Muscle bulges overlaid for visualization
+ * Smooth, anatomical human body built from lathe-revolved profiles.
+ * No more boxy capsules — the torso flows from hips → waist → chest →
+ * shoulders in one continuous mesh, and limbs taper organically.
+ * Subtle breathing animation makes it feel alive.
  */
-export function HumanBodyModel({ shape, visual, autoRotate = true }: Props) {
+export function HumanBodyModel({ shape, autoRotate = true }: Props) {
   const groupRef = useRef<THREE.Group>(null);
-  const { sex, girth, muscleDef, heightScale, waistRatio } = shape;
+  const torsoRef = useRef<THREE.Mesh>(null);
+  const { sex, girth, heightScale } = shape;
   const skin = sex === 'male' ? SKIN_MALE : SKIN_FEMALE;
 
-  useFrame((_, delta) => {
+  const torsoProfile = useMemo(() => buildTorsoProfile(shape), [shape]);
+
+  // Limb profiles
+  const upperArmProfile = useMemo(
+    () => buildLimbProfile(0.16 * girth, 0.14 * girth, 0.11 * girth, 0.7 * heightScale),
+    [girth, heightScale],
+  );
+  const forearmProfile = useMemo(
+    () => buildLimbProfile(0.11 * girth, 0.105 * girth, 0.08 * girth, 0.65 * heightScale),
+    [girth, heightScale],
+  );
+  const thighProfile = useMemo(
+    () => buildLimbProfile(0.24 * girth, 0.2 * girth, 0.14 * girth, 0.9 * heightScale),
+    [girth, heightScale],
+  );
+  const shinProfile = useMemo(
+    () => buildLimbProfile(0.14 * girth, 0.13 * girth, 0.08 * girth, 0.85 * heightScale),
+    [girth, heightScale],
+  );
+
+  // Soft animation: breathing + gentle rotation
+  useFrame((state, delta) => {
     if (autoRotate && groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.3;
+      groupRef.current.rotation.y += delta * 0.25;
+    }
+    if (torsoRef.current) {
+      const t = state.clock.elapsedTime;
+      const breath = 1 + Math.sin(t * 1.2) * 0.012;
+      torsoRef.current.scale.set(breath, 1, breath);
     }
   });
 
-  // Gendered proportions
-  const shoulderW = sex === 'male' ? 0.62 * girth : 0.5 * girth;
-  const hipW = sex === 'male' ? 0.42 * girth : 0.5 * girth;
-  const waistW = hipW * waistRatio;
-  const chestDepth = sex === 'male' ? 0.32 * girth : 0.3 * girth;
-
-  // Vertical anchors (root at feet level y=0)
-  const headY = 3.5 * heightScale;
-  const neckY = 3.0 * heightScale;
-  const chestY = 2.55 * heightScale;
-  const waistY = 1.85 * heightScale;
-  const hipY = 1.4 * heightScale;
-  const kneeY = 0.55 * heightScale;
-  const footY = -0.15 * heightScale;
-
-  // Common skin material props for body trunk pieces
-  const skinMat = (
-    <meshStandardMaterial color={skin} roughness={0.55} metalness={0.02} />
-  );
+  // Anatomical anchor points (y measured from feet, scaled at the end)
+  const torsoBaseY = 1.6 * heightScale;        // hip-bottom
+  const torsoTopY = torsoBaseY + 2.45 * heightScale; // shoulder top (~y=4.05)
+  const shoulderY = torsoBaseY + 2.2 * heightScale;
+  const hipY = torsoBaseY + 0.2 * heightScale;
+  const headRadius = 0.32 * heightScale;
+  const headY = torsoTopY + 0.35 * heightScale + headRadius;
+  const shoulderX = (sex === 'male' ? 0.78 : 0.62) * girth;
+  const hipX = (sex === 'male' ? 0.42 : 0.5) * girth;
 
   return (
-    <group ref={groupRef} position={[0, -1.6, 0]}>
-      {/* ======================== HEAD & NECK ======================== */}
-      {/* Head — slightly oval */}
-      <mesh position={[0, headY, 0]} scale={[0.42, 0.5, 0.45]} castShadow>
-        <sphereGeometry args={[1, 32, 32]} />
-        {skinMat}
-      </mesh>
-      {/* Jaw hint */}
-      <mesh position={[0, headY - 0.18, 0.05]} scale={[0.32, 0.18, 0.36]} castShadow>
-        <sphereGeometry args={[1, 24, 24]} />
-        {skinMat}
-      </mesh>
-      {/* Neck */}
-      <Limb position={[0, neckY, 0]} radius={0.16} length={0.28} color={skin} />
-
-      {/* Traps */}
-      <Bulge mg="traps" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.18, 0.1, 0.16]} position={[-0.18, neckY - 0.05, -0.05]}
-      />
-      <Bulge mg="traps" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.18, 0.1, 0.16]} position={[0.18, neckY - 0.05, -0.05]}
-      />
-
-      {/* ======================== TORSO ======================== */}
-      {/* Upper torso (chest cavity) — wider at shoulders, tapers to waist */}
-      <mesh position={[0, chestY, 0]} castShadow>
-        <cylinderGeometry args={[shoulderW * 0.85, waistW, 1.1 * heightScale, 32, 1, false]} />
-        {skinMat}
-      </mesh>
-      {/* Front chest plane (slightly forward for depth) */}
-      <mesh position={[0, chestY, chestDepth * 0.4]} scale={[shoulderW * 0.78, 0.55 * heightScale, chestDepth * 0.4]} castShadow>
-        <sphereGeometry args={[1, 24, 24]} />
-        {skinMat}
-      </mesh>
-      {/* Back plane */}
-      <mesh position={[0, chestY, -chestDepth * 0.4]} scale={[shoulderW * 0.82, 0.6 * heightScale, chestDepth * 0.4]} castShadow>
-        <sphereGeometry args={[1, 24, 24]} />
-        {skinMat}
+    <group ref={groupRef} position={[0, -2.6, 0]}>
+      {/* ============ TORSO (lathe-revolved) ============ */}
+      <mesh ref={torsoRef} position={[0, torsoBaseY, 0]} castShadow receiveShadow>
+        <latheGeometry args={[torsoProfile, 48]} />
+        <SkinMaterial color={skin} />
       </mesh>
 
-      {/* Waist (mid section) */}
-      <mesh position={[0, waistY, 0]} castShadow>
-        <cylinderGeometry args={[waistW, hipW * 0.9, 0.5 * heightScale, 32]} />
-        {skinMat}
-      </mesh>
-
-      {/* Pelvis / hips */}
-      <mesh position={[0, hipY, 0]} castShadow>
-        <sphereGeometry args={[1, 32, 32]} />
-        <meshStandardMaterial color={skin} roughness={0.55} />
-        <group scale={[hipW, 0.32 * heightScale, hipW * 0.75]} />
-      </mesh>
-      <mesh position={[0, hipY, 0]} scale={[hipW, 0.35 * heightScale, hipW * 0.78]} castShadow>
-        <sphereGeometry args={[1, 32, 32]} />
-        {skinMat}
-      </mesh>
-
-      {/* ======================== CHEST MUSCLES (pecs / breasts) ======================== */}
+      {/* Subtle chest definition — pec planes for males, breast curves for females */}
       {sex === 'male' ? (
         <>
-          <Bulge mg="chest" visual={visual} baseSkin={skin} defMult={muscleDef}
-            scale={[shoulderW * 0.42, 0.18 * heightScale, 0.16]}
-            position={[-shoulderW * 0.35, chestY + 0.2, chestDepth * 0.7]}
-          />
-          <Bulge mg="chest" visual={visual} baseSkin={skin} defMult={muscleDef}
-            scale={[shoulderW * 0.42, 0.18 * heightScale, 0.16]}
-            position={[shoulderW * 0.35, chestY + 0.2, chestDepth * 0.7]}
-          />
+          <mesh position={[-0.18 * girth, shoulderY - 0.25, 0.55 * girth]} castShadow>
+            <sphereGeometry args={[0.22 * girth, 24, 24]} />
+            <SkinMaterial color={skin} />
+          </mesh>
+          <mesh position={[0.18 * girth, shoulderY - 0.25, 0.55 * girth]} castShadow>
+            <sphereGeometry args={[0.22 * girth, 24, 24]} />
+            <SkinMaterial color={skin} />
+          </mesh>
         </>
       ) : (
         <>
-          <Bulge mg="chest" visual={visual} baseSkin={skin} defMult={muscleDef}
-            scale={[0.22, 0.22, 0.22]}
-            position={[-shoulderW * 0.32, chestY + 0.05, chestDepth * 0.95]}
-          />
-          <Bulge mg="chest" visual={visual} baseSkin={skin} defMult={muscleDef}
-            scale={[0.22, 0.22, 0.22]}
-            position={[shoulderW * 0.32, chestY + 0.05, chestDepth * 0.95]}
-          />
+          <mesh position={[-0.2 * girth, shoulderY - 0.35, 0.6 * girth]} castShadow>
+            <sphereGeometry args={[0.2 * girth, 24, 24]} />
+            <SkinMaterial color={skin} />
+          </mesh>
+          <mesh position={[0.2 * girth, shoulderY - 0.35, 0.6 * girth]} castShadow>
+            <sphereGeometry args={[0.2 * girth, 24, 24]} />
+            <SkinMaterial color={skin} />
+          </mesh>
         </>
       )}
 
-      {/* ======================== ABS (front) ======================== */}
-      {sex === 'male' && [0.15, -0.05, -0.25].map((dy, idx) => (
-        <group key={idx}>
-          <Bulge mg="abs" visual={visual} baseSkin={skin} defMult={muscleDef}
-            scale={[0.11, 0.08, 0.08]}
-            position={[-0.12, waistY + dy, chestDepth * 0.85]}
-          />
-          <Bulge mg="abs" visual={visual} baseSkin={skin} defMult={muscleDef}
-            scale={[0.11, 0.08, 0.08]}
-            position={[0.12, waistY + dy, chestDepth * 0.85]}
-          />
-        </group>
-      ))}
-      {sex === 'female' && (
-        <Bulge mg="abs" visual={visual} baseSkin={skin} defMult={muscleDef}
-          scale={[0.18, 0.28, 0.1]}
-          position={[0, waistY - 0.05, chestDepth * 0.85]}
-        />
-      )}
+      {/* Glutes (back) */}
+      <mesh position={[-0.22 * girth, hipY + 0.05, -0.4 * girth]} castShadow>
+        <sphereGeometry args={[0.28 * girth, 20, 20]} />
+        <SkinMaterial color={skin} />
+      </mesh>
+      <mesh position={[0.22 * girth, hipY + 0.05, -0.4 * girth]} castShadow>
+        <sphereGeometry args={[0.28 * girth, 20, 20]} />
+        <SkinMaterial color={skin} />
+      </mesh>
 
-      {/* Obliques */}
-      <Bulge mg="obliques" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.1, 0.28, 0.16]}
-        position={[-waistW * 0.95, waistY, chestDepth * 0.4]}
-      />
-      <Bulge mg="obliques" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.1, 0.28, 0.16]}
-        position={[waistW * 0.95, waistY, chestDepth * 0.4]}
-      />
+      {/* ============ NECK ============ */}
+      <mesh position={[0, torsoTopY + 0.12, 0]} castShadow>
+        <cylinderGeometry args={[0.16, 0.18, 0.28, 24]} />
+        <SkinMaterial color={skin} />
+      </mesh>
 
-      {/* ======================== BACK ======================== */}
-      <Bulge mg="upper_back" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[shoulderW * 0.45, 0.32 * heightScale, 0.14]}
-        position={[-shoulderW * 0.3, chestY + 0.05, -chestDepth * 0.7]}
-      />
-      <Bulge mg="upper_back" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[shoulderW * 0.45, 0.32 * heightScale, 0.14]}
-        position={[shoulderW * 0.3, chestY + 0.05, -chestDepth * 0.7]}
-      />
-      <Bulge mg="lower_back" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.18, 0.2, 0.13]}
-        position={[-0.14, waistY - 0.05, -chestDepth * 0.75]}
-      />
-      <Bulge mg="lower_back" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.18, 0.2, 0.13]}
-        position={[0.14, waistY - 0.05, -chestDepth * 0.75]}
-      />
+      {/* ============ HEAD ============ */}
+      <mesh position={[0, headY, 0]} scale={[0.92, 1.05, 0.95]} castShadow>
+        <sphereGeometry args={[headRadius, 32, 32]} />
+        <SkinMaterial color={skin} />
+      </mesh>
+      {/* Jaw hint */}
+      <mesh position={[0, headY - headRadius * 0.45, headRadius * 0.15]} scale={[0.7, 0.45, 0.85]} castShadow>
+        <sphereGeometry args={[headRadius * 0.78, 24, 24]} />
+        <SkinMaterial color={skin} />
+      </mesh>
 
-      {/* ======================== SHOULDERS (deltoids) ======================== */}
-      <Bulge mg="shoulders" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.22, 0.22, 0.22]}
-        position={[-shoulderW - 0.05, chestY + 0.32 * heightScale, 0]}
-      />
-      <Bulge mg="shoulders" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.22, 0.22, 0.22]}
-        position={[shoulderW + 0.05, chestY + 0.32 * heightScale, 0]}
-      />
+      {/* ============ SHOULDER CAPS (deltoids) ============ */}
+      <mesh position={[-shoulderX, shoulderY - 0.05, 0]} castShadow>
+        <sphereGeometry args={[0.22 * girth, 24, 24]} />
+        <SkinMaterial color={skin} />
+      </mesh>
+      <mesh position={[shoulderX, shoulderY - 0.05, 0]} castShadow>
+        <sphereGeometry args={[0.22 * girth, 24, 24]} />
+        <SkinMaterial color={skin} />
+      </mesh>
 
-      {/* ======================== ARMS — capsule limbs + muscle bulges ======================== */}
-      {/* Upper arm (humerus area) — left */}
-      <Limb position={[-shoulderW - 0.12, chestY - 0.05, 0]} radius={0.13} length={0.55 * heightScale} color={skin} />
-      <Limb position={[shoulderW + 0.12, chestY - 0.05, 0]} radius={0.13} length={0.55 * heightScale} color={skin} />
+      {/* ============ ARMS ============ */}
+      {/* Upper arm — lathe profile, hung downward */}
+      <group position={[-shoulderX - 0.02, shoulderY - 0.05, 0]} rotation={[0, 0, 0]}>
+        <mesh castShadow rotation={[Math.PI, 0, 0]}>
+          <latheGeometry args={[upperArmProfile, 32]} />
+          <SkinMaterial color={skin} />
+        </mesh>
+      </group>
+      <group position={[shoulderX + 0.02, shoulderY - 0.05, 0]}>
+        <mesh castShadow rotation={[Math.PI, 0, 0]}>
+          <latheGeometry args={[upperArmProfile, 32]} />
+          <SkinMaterial color={skin} />
+        </mesh>
+      </group>
 
-      {/* Biceps (front of upper arm) */}
-      <Bulge mg="biceps" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.13, 0.22, 0.13]}
-        position={[-shoulderW - 0.12, chestY - 0.05, 0.08]}
-      />
-      <Bulge mg="biceps" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.13, 0.22, 0.13]}
-        position={[shoulderW + 0.12, chestY - 0.05, 0.08]}
-      />
-      {/* Triceps (back of upper arm) */}
-      <Bulge mg="triceps" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.13, 0.24, 0.13]}
-        position={[-shoulderW - 0.12, chestY - 0.05, -0.08]}
-      />
-      <Bulge mg="triceps" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.13, 0.24, 0.13]}
-        position={[shoulderW + 0.12, chestY - 0.05, -0.08]}
-      />
+      {/* Elbow */}
+      <mesh position={[-shoulderX - 0.02, shoulderY - 0.05 - 0.7 * heightScale, 0]} castShadow>
+        <sphereGeometry args={[0.11 * girth, 16, 16]} />
+        <SkinMaterial color={skin} />
+      </mesh>
+      <mesh position={[shoulderX + 0.02, shoulderY - 0.05 - 0.7 * heightScale, 0]} castShadow>
+        <sphereGeometry args={[0.11 * girth, 16, 16]} />
+        <SkinMaterial color={skin} />
+      </mesh>
 
-      {/* Forearms */}
-      <Limb position={[-shoulderW - 0.18, chestY - 0.7 * heightScale, 0]} radius={0.1} length={0.5 * heightScale} color={skin} />
-      <Limb position={[shoulderW + 0.18, chestY - 0.7 * heightScale, 0]} radius={0.1} length={0.5 * heightScale} color={skin} />
-      <Bulge mg="forearms" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.12, 0.22, 0.12]}
-        position={[-shoulderW - 0.18, chestY - 0.55 * heightScale, 0]}
-      />
-      <Bulge mg="forearms" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.12, 0.22, 0.12]}
-        position={[shoulderW + 0.18, chestY - 0.55 * heightScale, 0]}
-      />
+      {/* Forearm */}
+      <group position={[-shoulderX - 0.02, shoulderY - 0.05 - 0.7 * heightScale, 0]}>
+        <mesh castShadow rotation={[Math.PI, 0, 0]}>
+          <latheGeometry args={[forearmProfile, 32]} />
+          <SkinMaterial color={skin} />
+        </mesh>
+      </group>
+      <group position={[shoulderX + 0.02, shoulderY - 0.05 - 0.7 * heightScale, 0]}>
+        <mesh castShadow rotation={[Math.PI, 0, 0]}>
+          <latheGeometry args={[forearmProfile, 32]} />
+          <SkinMaterial color={skin} />
+        </mesh>
+      </group>
 
       {/* Hands */}
-      <mesh position={[-shoulderW - 0.22, chestY - 1.05 * heightScale, 0]} castShadow>
-        <sphereGeometry args={[0.11, 16, 16]} />
-        {skinMat}
+      <mesh position={[-shoulderX - 0.02, shoulderY - 0.05 - (0.7 + 0.65) * heightScale - 0.04, 0]} scale={[0.8, 1.15, 0.45]} castShadow>
+        <sphereGeometry args={[0.11, 18, 18]} />
+        <SkinMaterial color={skin} />
       </mesh>
-      <mesh position={[shoulderW + 0.22, chestY - 1.05 * heightScale, 0]} castShadow>
-        <sphereGeometry args={[0.11, 16, 16]} />
-        {skinMat}
-      </mesh>
-
-      {/* ======================== GLUTES ======================== */}
-      <Bulge mg="glutes" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[hipW * 0.55, 0.22, 0.25]}
-        position={[-hipW * 0.4, hipY - 0.05, -chestDepth * 0.5]}
-      />
-      <Bulge mg="glutes" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[hipW * 0.55, 0.22, 0.25]}
-        position={[hipW * 0.4, hipY - 0.05, -chestDepth * 0.5]}
-      />
-
-      {/* ======================== LEGS ======================== */}
-      {/* Thighs */}
-      <Limb position={[-hipW * 0.55, (hipY + kneeY) / 2, 0]} radius={0.18} length={0.7 * heightScale} color={skin} />
-      <Limb position={[hipW * 0.55, (hipY + kneeY) / 2, 0]} radius={0.18} length={0.7 * heightScale} color={skin} />
-
-      {/* Quads (front) */}
-      <Bulge mg="quads" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.18, 0.4 * heightScale, 0.16]}
-        position={[-hipW * 0.55, (hipY + kneeY) / 2, 0.12]}
-      />
-      <Bulge mg="quads" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.18, 0.4 * heightScale, 0.16]}
-        position={[hipW * 0.55, (hipY + kneeY) / 2, 0.12]}
-      />
-      {/* Hamstrings (back) */}
-      <Bulge mg="hamstrings" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.16, 0.38 * heightScale, 0.15]}
-        position={[-hipW * 0.55, (hipY + kneeY) / 2, -0.13]}
-      />
-      <Bulge mg="hamstrings" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.16, 0.38 * heightScale, 0.15]}
-        position={[hipW * 0.55, (hipY + kneeY) / 2, -0.13]}
-      />
-
-      {/* Knees */}
-      <mesh position={[-hipW * 0.55, kneeY, 0]} castShadow>
-        <sphereGeometry args={[0.16, 20, 20]} />
-        {skinMat}
-      </mesh>
-      <mesh position={[hipW * 0.55, kneeY, 0]} castShadow>
-        <sphereGeometry args={[0.16, 20, 20]} />
-        {skinMat}
+      <mesh position={[shoulderX + 0.02, shoulderY - 0.05 - (0.7 + 0.65) * heightScale - 0.04, 0]} scale={[0.8, 1.15, 0.45]} castShadow>
+        <sphereGeometry args={[0.11, 18, 18]} />
+        <SkinMaterial color={skin} />
       </mesh>
 
-      {/* Lower legs */}
-      <Limb position={[-hipW * 0.55, (kneeY + footY) / 2, 0]} radius={0.13} length={0.55 * heightScale} color={skin} />
-      <Limb position={[hipW * 0.55, (kneeY + footY) / 2, 0]} radius={0.13} length={0.55 * heightScale} color={skin} />
+      {/* ============ LEGS ============ */}
+      {/* Thigh */}
+      <group position={[-hipX, hipY - 0.05, 0]}>
+        <mesh castShadow rotation={[Math.PI, 0, 0]}>
+          <latheGeometry args={[thighProfile, 32]} />
+          <SkinMaterial color={skin} />
+        </mesh>
+      </group>
+      <group position={[hipX, hipY - 0.05, 0]}>
+        <mesh castShadow rotation={[Math.PI, 0, 0]}>
+          <latheGeometry args={[thighProfile, 32]} />
+          <SkinMaterial color={skin} />
+        </mesh>
+      </group>
 
-      {/* Calves */}
-      <Bulge mg="calves" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.15, 0.3 * heightScale, 0.16]}
-        position={[-hipW * 0.55, (kneeY + footY) / 2 + 0.05, -0.08]}
-      />
-      <Bulge mg="calves" visual={visual} baseSkin={skin} defMult={muscleDef}
-        scale={[0.15, 0.3 * heightScale, 0.16]}
-        position={[hipW * 0.55, (kneeY + footY) / 2 + 0.05, -0.08]}
-      />
+      {/* Knee */}
+      <mesh position={[-hipX, hipY - 0.05 - 0.9 * heightScale, 0]} castShadow>
+        <sphereGeometry args={[0.16 * girth, 20, 20]} />
+        <SkinMaterial color={skin} />
+      </mesh>
+      <mesh position={[hipX, hipY - 0.05 - 0.9 * heightScale, 0]} castShadow>
+        <sphereGeometry args={[0.16 * girth, 20, 20]} />
+        <SkinMaterial color={skin} />
+      </mesh>
+
+      {/* Shin / calf */}
+      <group position={[-hipX, hipY - 0.05 - 0.9 * heightScale, 0]}>
+        <mesh castShadow rotation={[Math.PI, 0, 0]}>
+          <latheGeometry args={[shinProfile, 32]} />
+          <SkinMaterial color={skin} />
+        </mesh>
+      </group>
+      <group position={[hipX, hipY - 0.05 - 0.9 * heightScale, 0]}>
+        <mesh castShadow rotation={[Math.PI, 0, 0]}>
+          <latheGeometry args={[shinProfile, 32]} />
+          <SkinMaterial color={skin} />
+        </mesh>
+      </group>
+
+      {/* Calf bulge (back) */}
+      <mesh position={[-hipX, hipY - 0.05 - 0.9 * heightScale - 0.3, -0.06]} scale={[0.8, 1.1, 0.7]} castShadow>
+        <sphereGeometry args={[0.15 * girth, 18, 18]} />
+        <SkinMaterial color={skin} />
+      </mesh>
+      <mesh position={[hipX, hipY - 0.05 - 0.9 * heightScale - 0.3, -0.06]} scale={[0.8, 1.1, 0.7]} castShadow>
+        <sphereGeometry args={[0.15 * girth, 18, 18]} />
+        <SkinMaterial color={skin} />
+      </mesh>
 
       {/* Feet */}
-      <mesh position={[-hipW * 0.55, footY - 0.18, 0.1]} castShadow>
-        <boxGeometry args={[0.18, 0.1, 0.34]} />
+      <mesh position={[-hipX, hipY - 0.05 - (0.9 + 0.85) * heightScale - 0.02, 0.08]} castShadow>
+        <boxGeometry args={[0.18, 0.1, 0.36]} />
         <meshStandardMaterial color="#3a2418" roughness={0.7} />
       </mesh>
-      <mesh position={[hipW * 0.55, footY - 0.18, 0.1]} castShadow>
-        <boxGeometry args={[0.18, 0.1, 0.34]} />
+      <mesh position={[hipX, hipY - 0.05 - (0.9 + 0.85) * heightScale - 0.02, 0.08]} castShadow>
+        <boxGeometry args={[0.18, 0.1, 0.36]} />
         <meshStandardMaterial color="#3a2418" roughness={0.7} />
       </mesh>
     </group>
