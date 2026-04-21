@@ -1,6 +1,4 @@
-import { useMuscleTraining, MUSCLE_GROUPS, MUSCLE_LABELS, MuscleGroup, TimeRange } from '@/hooks/useMuscleTraining';
-import { useBodyMetrics, calculateBMI, calculateBodyFat } from '@/hooks/useBodyMetrics';
-import { MuscleBody3D } from './MuscleBody3D';
+import { useMuscleTraining, MUSCLE_LABELS, MuscleGroup, TimeRange } from '@/hooks/useMuscleTraining';
 import { Check } from 'lucide-react';
 
 // Color scale: purple (most) → gold → green → red (least but trained)
