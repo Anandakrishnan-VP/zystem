@@ -17,7 +17,11 @@ const getFillOpacity = (count: number): number => {
   return count > 0 ? 0.7 : 0.15;
 };
 
-// Front-view muscle body SVG
+// Body silhouette path (anatomical proportions)
+const BODY_FILL = 'hsl(var(--muted) / 0.25)';
+const BODY_STROKE = 'hsl(var(--foreground) / 0.5)';
+
+// Anatomical front-view body
 const FrontDiagram = ({ counts, maxCount }: {
   counts: Record<string, number>;
   maxCount: number;
@@ -26,36 +30,91 @@ const FrontDiagram = ({ counts, maxCount }: {
   const mo = (m: MuscleGroup) => getFillOpacity(counts[m] || 0);
 
   return (
-    <svg viewBox="0 0 200 400" className="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="100" cy="32" rx="18" ry="22" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.4" />
-      <rect x="92" y="52" width="16" height="14" rx="3" fill={mc('neck')} fillOpacity={mo('neck')} stroke={mc('neck')} strokeWidth="1" />
-      <polygon points="76,66 92,58 92,72 76,76" fill={mc('traps')} fillOpacity={mo('traps')} stroke={mc('traps')} strokeWidth="1" />
-      <polygon points="124,66 108,58 108,72 124,76" fill={mc('traps')} fillOpacity={mo('traps')} stroke={mc('traps')} strokeWidth="1" />
-      <ellipse cx="68" cy="82" rx="14" ry="10" fill={mc('shoulders')} fillOpacity={mo('shoulders')} stroke={mc('shoulders')} strokeWidth="1.5" />
-      <ellipse cx="132" cy="82" rx="14" ry="10" fill={mc('shoulders')} fillOpacity={mo('shoulders')} stroke={mc('shoulders')} strokeWidth="1.5" />
-      <path d="M 78,78 Q 100,72 122,78 L 118,108 Q 100,114 82,108 Z" fill={mc('chest')} fillOpacity={mo('chest')} stroke={mc('chest')} strokeWidth="1.5" />
-      <ellipse cx="58" cy="110" rx="8" ry="20" fill={mc('biceps')} fillOpacity={mo('biceps')} stroke={mc('biceps')} strokeWidth="1.5" transform="rotate(-10 58 110)" />
-      <ellipse cx="142" cy="110" rx="8" ry="20" fill={mc('biceps')} fillOpacity={mo('biceps')} stroke={mc('biceps')} strokeWidth="1.5" transform="rotate(10 142 110)" />
-      <ellipse cx="48" cy="150" rx="6" ry="22" fill={mc('forearms')} fillOpacity={mo('forearms')} stroke={mc('forearms')} strokeWidth="1" transform="rotate(-5 48 150)" />
-      <ellipse cx="152" cy="150" rx="6" ry="22" fill={mc('forearms')} fillOpacity={mo('forearms')} stroke={mc('forearms')} strokeWidth="1" transform="rotate(5 152 150)" />
-      <rect x="88" y="110" width="24" height="50" rx="4" fill={mc('abs')} fillOpacity={mo('abs')} stroke={mc('abs')} strokeWidth="1.5" />
-      {[122, 134, 146].map(y => (<line key={y} x1="90" y1={y} x2="110" y2={y} stroke={mc('abs')} strokeWidth="0.8" opacity="0.5" />))}
-      <polygon points="82,110 88,110 86,160 78,156" fill={mc('obliques')} fillOpacity={mo('obliques')} stroke={mc('obliques')} strokeWidth="1" />
-      <polygon points="118,110 112,110 114,160 122,156" fill={mc('obliques')} fillOpacity={mo('obliques')} stroke={mc('obliques')} strokeWidth="1" />
-      <ellipse cx="84" cy="225" rx="14" ry="38" fill={mc('quads')} fillOpacity={mo('quads')} stroke={mc('quads')} strokeWidth="1.5" />
-      <ellipse cx="116" cy="225" rx="14" ry="38" fill={mc('quads')} fillOpacity={mo('quads')} stroke={mc('quads')} strokeWidth="1.5" />
-      <ellipse cx="82" cy="305" rx="10" ry="28" fill={mc('calves')} fillOpacity={mo('calves')} stroke={mc('calves')} strokeWidth="1.5" />
-      <ellipse cx="118" cy="305" rx="10" ry="28" fill={mc('calves')} fillOpacity={mo('calves')} stroke={mc('calves')} strokeWidth="1.5" />
-      <ellipse cx="80" cy="340" rx="10" ry="6" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1" opacity="0.3" />
-      <ellipse cx="120" cy="340" rx="10" ry="6" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1" opacity="0.3" />
-      <ellipse cx="44" cy="176" rx="6" ry="8" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1" opacity="0.3" />
-      <ellipse cx="156" cy="176" rx="6" ry="8" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1" opacity="0.3" />
-      <text x="100" y="390" textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: '9px', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Front</text>
+    <svg viewBox="0 0 220 440" className="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+      {/* Body silhouette — head, neck, torso, arms, legs */}
+      <g fill={BODY_FILL} stroke={BODY_STROKE} strokeWidth="1.2" strokeLinejoin="round">
+        {/* Head */}
+        <ellipse cx="110" cy="32" rx="20" ry="25" />
+        {/* Neck */}
+        <path d="M 100,55 Q 110,62 120,55 L 122,72 Q 110,76 98,72 Z" />
+        {/* Torso silhouette (shoulders → waist → hips) */}
+        <path d="M 70,78 Q 85,72 110,72 Q 135,72 150,78 L 156,118 Q 152,160 148,200 Q 145,215 140,225 L 80,225 Q 75,215 72,200 Q 68,160 64,118 Z" />
+        {/* Left arm */}
+        <path d="M 70,80 Q 56,85 52,110 Q 48,140 46,170 Q 44,195 48,215 Q 52,225 56,228 Q 62,228 64,222 Q 66,200 68,175 Q 70,140 72,110 Q 74,90 70,80 Z" />
+        {/* Right arm */}
+        <path d="M 150,80 Q 164,85 168,110 Q 172,140 174,170 Q 176,195 172,215 Q 168,225 164,228 Q 158,228 156,222 Q 154,200 152,175 Q 150,140 148,110 Q 146,90 150,80 Z" />
+        {/* Hands */}
+        <ellipse cx="56" cy="240" rx="9" ry="13" />
+        <ellipse cx="164" cy="240" rx="9" ry="13" />
+        {/* Left leg */}
+        <path d="M 80,225 Q 75,260 76,300 Q 77,340 82,380 Q 86,400 92,410 Q 100,410 102,400 Q 104,360 104,320 Q 104,275 102,235 Z" />
+        {/* Right leg */}
+        <path d="M 140,225 Q 145,260 144,300 Q 143,340 138,380 Q 134,400 128,410 Q 120,410 118,400 Q 116,360 116,320 Q 116,275 118,235 Z" />
+        {/* Feet */}
+        <ellipse cx="93" cy="420" rx="11" ry="6" />
+        <ellipse cx="127" cy="420" rx="11" ry="6" />
+      </g>
+
+      {/* === MUSCLES (front) === */}
+      {/* Neck */}
+      <path d="M 100,58 Q 110,64 120,58 L 121,70 Q 110,73 99,70 Z"
+        fill={mc('neck')} fillOpacity={mo('neck')} stroke={mc('neck')} strokeWidth="0.8" />
+      {/* Trapezius (upper) */}
+      <path d="M 78,76 Q 95,72 110,75 Q 125,72 142,76 L 138,86 Q 110,90 82,86 Z"
+        fill={mc('traps')} fillOpacity={mo('traps')} stroke={mc('traps')} strokeWidth="0.8" />
+      {/* Deltoids (shoulders) */}
+      <path d="M 64,82 Q 56,90 56,108 Q 64,114 76,110 Q 80,95 78,82 Q 72,78 64,82 Z"
+        fill={mc('shoulders')} fillOpacity={mo('shoulders')} stroke={mc('shoulders')} strokeWidth="0.8" />
+      <path d="M 156,82 Q 164,90 164,108 Q 156,114 144,110 Q 140,95 142,82 Q 148,78 156,82 Z"
+        fill={mc('shoulders')} fillOpacity={mo('shoulders')} stroke={mc('shoulders')} strokeWidth="0.8" />
+      {/* Pectoralis (chest) — left & right */}
+      <path d="M 82,90 Q 95,86 108,90 Q 110,108 108,120 Q 95,124 82,118 Q 78,105 82,90 Z"
+        fill={mc('chest')} fillOpacity={mo('chest')} stroke={mc('chest')} strokeWidth="0.8" />
+      <path d="M 138,90 Q 125,86 112,90 Q 110,108 112,120 Q 125,124 138,118 Q 142,105 138,90 Z"
+        fill={mc('chest')} fillOpacity={mo('chest')} stroke={mc('chest')} strokeWidth="0.8" />
+      {/* Biceps */}
+      <path d="M 54,108 Q 50,125 52,150 Q 58,158 64,154 Q 66,135 64,112 Q 60,106 54,108 Z"
+        fill={mc('biceps')} fillOpacity={mo('biceps')} stroke={mc('biceps')} strokeWidth="0.8" />
+      <path d="M 166,108 Q 170,125 168,150 Q 162,158 156,154 Q 154,135 156,112 Q 160,106 166,108 Z"
+        fill={mc('biceps')} fillOpacity={mo('biceps')} stroke={mc('biceps')} strokeWidth="0.8" />
+      {/* Forearms */}
+      <path d="M 50,158 Q 46,180 48,210 Q 54,220 60,216 Q 62,190 60,162 Q 56,156 50,158 Z"
+        fill={mc('forearms')} fillOpacity={mo('forearms')} stroke={mc('forearms')} strokeWidth="0.8" />
+      <path d="M 170,158 Q 174,180 172,210 Q 166,220 160,216 Q 158,190 160,162 Q 164,156 170,158 Z"
+        fill={mc('forearms')} fillOpacity={mo('forearms')} stroke={mc('forearms')} strokeWidth="0.8" />
+      {/* Abdominals — 6-pack rectangles */}
+      <g fill={mc('abs')} fillOpacity={mo('abs')} stroke={mc('abs')} strokeWidth="0.8">
+        <rect x="92" y="122" width="11" height="13" rx="2" />
+        <rect x="117" y="122" width="11" height="13" rx="2" />
+        <rect x="92" y="138" width="11" height="13" rx="2" />
+        <rect x="117" y="138" width="11" height="13" rx="2" />
+        <rect x="92" y="154" width="11" height="13" rx="2" />
+        <rect x="117" y="154" width="11" height="13" rx="2" />
+        <path d="M 92,170 L 128,170 Q 120,184 110,186 Q 100,184 92,170 Z" />
+      </g>
+      {/* Obliques */}
+      <path d="M 78,118 Q 76,150 84,180 Q 90,182 92,170 L 92,122 Z"
+        fill={mc('obliques')} fillOpacity={mo('obliques')} stroke={mc('obliques')} strokeWidth="0.8" />
+      <path d="M 142,118 Q 144,150 136,180 Q 130,182 128,170 L 128,122 Z"
+        fill={mc('obliques')} fillOpacity={mo('obliques')} stroke={mc('obliques')} strokeWidth="0.8" />
+      {/* Quadriceps */}
+      <path d="M 82,232 Q 78,275 80,320 Q 86,335 96,332 Q 100,300 100,260 Q 100,238 96,232 Z"
+        fill={mc('quads')} fillOpacity={mo('quads')} stroke={mc('quads')} strokeWidth="0.8" />
+      <path d="M 138,232 Q 142,275 140,320 Q 134,335 124,332 Q 120,300 120,260 Q 120,238 124,232 Z"
+        fill={mc('quads')} fillOpacity={mo('quads')} stroke={mc('quads')} strokeWidth="0.8" />
+      {/* Calves (front-visible portions of lower leg) */}
+      <path d="M 82,345 Q 80,375 86,400 Q 92,402 96,398 Q 96,375 94,345 Z"
+        fill={mc('calves')} fillOpacity={mo('calves')} stroke={mc('calves')} strokeWidth="0.8" />
+      <path d="M 138,345 Q 140,375 134,400 Q 128,402 124,398 Q 124,375 126,345 Z"
+        fill={mc('calves')} fillOpacity={mo('calves')} stroke={mc('calves')} strokeWidth="0.8" />
+
+      <text x="110" y="435" textAnchor="middle" className="fill-muted-foreground"
+        style={{ fontSize: '9px', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Front</text>
     </svg>
   );
 };
 
-// Back-view muscle body SVG
+// Anatomical back-view body
 const BackDiagram = ({ counts, maxCount }: {
   counts: Record<string, number>;
   maxCount: number;
@@ -64,42 +123,72 @@ const BackDiagram = ({ counts, maxCount }: {
   const mo = (m: MuscleGroup) => getFillOpacity(counts[m] || 0);
 
   return (
-    <svg viewBox="0 0 200 400" className="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="100" cy="32" rx="18" ry="22" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.4" />
-      <rect x="92" y="52" width="16" height="14" rx="3" fill={mc('neck')} fillOpacity={mo('neck')} stroke={mc('neck')} strokeWidth="1" />
-      {/* Traps - larger on back view */}
-      <path d="M 76,66 L 92,58 L 100,62 L 108,58 L 124,66 L 120,82 Q 100,88 80,82 Z" fill={mc('traps')} fillOpacity={mo('traps')} stroke={mc('traps')} strokeWidth="1.5" />
-      {/* Rear delts */}
-      <ellipse cx="68" cy="82" rx="14" ry="10" fill={mc('shoulders')} fillOpacity={mo('shoulders')} stroke={mc('shoulders')} strokeWidth="1.5" />
-      <ellipse cx="132" cy="82" rx="14" ry="10" fill={mc('shoulders')} fillOpacity={mo('shoulders')} stroke={mc('shoulders')} strokeWidth="1.5" />
-      {/* Upper back / lats */}
-      <path d="M 80,82 Q 100,78 120,82 L 122,120 Q 100,126 78,120 Z" fill={mc('upper_back')} fillOpacity={mo('upper_back')} stroke={mc('upper_back')} strokeWidth="1.5" />
+    <svg viewBox="0 0 220 440" className="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+      {/* Body silhouette — same as front */}
+      <g fill={BODY_FILL} stroke={BODY_STROKE} strokeWidth="1.2" strokeLinejoin="round">
+        <ellipse cx="110" cy="32" rx="20" ry="25" />
+        <path d="M 100,55 Q 110,62 120,55 L 122,72 Q 110,76 98,72 Z" />
+        <path d="M 70,78 Q 85,72 110,72 Q 135,72 150,78 L 156,118 Q 152,160 148,200 Q 145,215 140,225 L 80,225 Q 75,215 72,200 Q 68,160 64,118 Z" />
+        <path d="M 70,80 Q 56,85 52,110 Q 48,140 46,170 Q 44,195 48,215 Q 52,225 56,228 Q 62,228 64,222 Q 66,200 68,175 Q 70,140 72,110 Q 74,90 70,80 Z" />
+        <path d="M 150,80 Q 164,85 168,110 Q 172,140 174,170 Q 176,195 172,215 Q 168,225 164,228 Q 158,228 156,222 Q 154,200 152,175 Q 150,140 148,110 Q 146,90 150,80 Z" />
+        <ellipse cx="56" cy="240" rx="9" ry="13" />
+        <ellipse cx="164" cy="240" rx="9" ry="13" />
+        <path d="M 80,225 Q 75,260 76,300 Q 77,340 82,380 Q 86,400 92,410 Q 100,410 102,400 Q 104,360 104,320 Q 104,275 102,235 Z" />
+        <path d="M 140,225 Q 145,260 144,300 Q 143,340 138,380 Q 134,400 128,410 Q 120,410 118,400 Q 116,360 116,320 Q 116,275 118,235 Z" />
+        <ellipse cx="93" cy="420" rx="11" ry="6" />
+        <ellipse cx="127" cy="420" rx="11" ry="6" />
+      </g>
+
+      {/* === MUSCLES (back) === */}
+      {/* Neck */}
+      <path d="M 100,58 Q 110,64 120,58 L 121,70 Q 110,73 99,70 Z"
+        fill={mc('neck')} fillOpacity={mo('neck')} stroke={mc('neck')} strokeWidth="0.8" />
+      {/* Trapezius (large diamond down to mid-back) */}
+      <path d="M 78,76 Q 95,72 110,75 Q 125,72 142,76 L 138,100 Q 122,108 110,108 Q 98,108 82,100 Z"
+        fill={mc('traps')} fillOpacity={mo('traps')} stroke={mc('traps')} strokeWidth="0.8" />
+      <path d="M 105,108 L 115,108 L 113,135 Q 110,138 107,135 Z"
+        fill={mc('traps')} fillOpacity={mo('traps')} stroke={mc('traps')} strokeWidth="0.6" />
+      {/* Rear deltoids */}
+      <path d="M 64,82 Q 56,90 56,108 Q 64,114 76,110 Q 80,95 78,82 Q 72,78 64,82 Z"
+        fill={mc('shoulders')} fillOpacity={mo('shoulders')} stroke={mc('shoulders')} strokeWidth="0.8" />
+      <path d="M 156,82 Q 164,90 164,108 Q 156,114 144,110 Q 140,95 142,82 Q 148,78 156,82 Z"
+        fill={mc('shoulders')} fillOpacity={mo('shoulders')} stroke={mc('shoulders')} strokeWidth="0.8" />
+      {/* Latissimus dorsi (upper back / lats) */}
+      <path d="M 80,100 Q 75,130 82,160 Q 95,168 108,160 L 108,108 Q 95,108 82,100 Z"
+        fill={mc('upper_back')} fillOpacity={mo('upper_back')} stroke={mc('upper_back')} strokeWidth="0.8" />
+      <path d="M 140,100 Q 145,130 138,160 Q 125,168 112,160 L 112,108 Q 125,108 138,100 Z"
+        fill={mc('upper_back')} fillOpacity={mo('upper_back')} stroke={mc('upper_back')} strokeWidth="0.8" />
       {/* Triceps */}
-      <ellipse cx="55" cy="110" rx="9" ry="20" fill={mc('triceps')} fillOpacity={mo('triceps')} stroke={mc('triceps')} strokeWidth="1.5" transform="rotate(-10 55 110)" />
-      <ellipse cx="145" cy="110" rx="9" ry="20" fill={mc('triceps')} fillOpacity={mo('triceps')} stroke={mc('triceps')} strokeWidth="1.5" transform="rotate(10 145 110)" />
+      <path d="M 50,108 Q 46,128 48,152 Q 54,160 62,156 Q 64,135 62,112 Q 56,106 50,108 Z"
+        fill={mc('triceps')} fillOpacity={mo('triceps')} stroke={mc('triceps')} strokeWidth="0.8" />
+      <path d="M 170,108 Q 174,128 172,152 Q 166,160 158,156 Q 156,135 158,112 Q 164,106 170,108 Z"
+        fill={mc('triceps')} fillOpacity={mo('triceps')} stroke={mc('triceps')} strokeWidth="0.8" />
       {/* Forearms */}
-      <ellipse cx="48" cy="150" rx="6" ry="22" fill={mc('forearms')} fillOpacity={mo('forearms')} stroke={mc('forearms')} strokeWidth="1" transform="rotate(-5 48 150)" />
-      <ellipse cx="152" cy="150" rx="6" ry="22" fill={mc('forearms')} fillOpacity={mo('forearms')} stroke={mc('forearms')} strokeWidth="1" transform="rotate(5 152 150)" />
-      {/* Lower back */}
-      <rect x="84" y="122" width="32" height="30" rx="5" fill={mc('lower_back')} fillOpacity={mo('lower_back')} stroke={mc('lower_back')} strokeWidth="1.5" />
-      {/* Spine line */}
-      <line x1="100" y1="82" x2="100" y2="155" stroke="hsl(var(--foreground))" strokeWidth="0.6" opacity="0.3" />
+      <path d="M 50,158 Q 46,180 48,210 Q 54,220 60,216 Q 62,190 60,162 Q 56,156 50,158 Z"
+        fill={mc('forearms')} fillOpacity={mo('forearms')} stroke={mc('forearms')} strokeWidth="0.8" />
+      <path d="M 170,158 Q 174,180 172,210 Q 166,220 160,216 Q 158,190 160,162 Q 164,156 170,158 Z"
+        fill={mc('forearms')} fillOpacity={mo('forearms')} stroke={mc('forearms')} strokeWidth="0.8" />
+      {/* Lower back (lumbar) */}
+      <path d="M 88,165 Q 85,190 92,215 L 128,215 Q 135,190 132,165 Q 110,170 88,165 Z"
+        fill={mc('lower_back')} fillOpacity={mo('lower_back')} stroke={mc('lower_back')} strokeWidth="0.8" />
       {/* Glutes */}
-      <ellipse cx="88" cy="172" rx="16" ry="14" fill={mc('glutes')} fillOpacity={mo('glutes')} stroke={mc('glutes')} strokeWidth="1.5" />
-      <ellipse cx="112" cy="172" rx="16" ry="14" fill={mc('glutes')} fillOpacity={mo('glutes')} stroke={mc('glutes')} strokeWidth="1.5" />
+      <ellipse cx="93" cy="240" rx="18" ry="16"
+        fill={mc('glutes')} fillOpacity={mo('glutes')} stroke={mc('glutes')} strokeWidth="0.8" />
+      <ellipse cx="127" cy="240" rx="18" ry="16"
+        fill={mc('glutes')} fillOpacity={mo('glutes')} stroke={mc('glutes')} strokeWidth="0.8" />
       {/* Hamstrings */}
-      <ellipse cx="84" cy="228" rx="14" ry="38" fill={mc('hamstrings')} fillOpacity={mo('hamstrings')} stroke={mc('hamstrings')} strokeWidth="1.5" />
-      <ellipse cx="116" cy="228" rx="14" ry="38" fill={mc('hamstrings')} fillOpacity={mo('hamstrings')} stroke={mc('hamstrings')} strokeWidth="1.5" />
-      {/* Calves */}
-      <ellipse cx="82" cy="305" rx="10" ry="28" fill={mc('calves')} fillOpacity={mo('calves')} stroke={mc('calves')} strokeWidth="1.5" />
-      <ellipse cx="118" cy="305" rx="10" ry="28" fill={mc('calves')} fillOpacity={mo('calves')} stroke={mc('calves')} strokeWidth="1.5" />
-      {/* Feet */}
-      <ellipse cx="80" cy="340" rx="10" ry="6" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1" opacity="0.3" />
-      <ellipse cx="120" cy="340" rx="10" ry="6" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1" opacity="0.3" />
-      {/* Hands */}
-      <ellipse cx="44" cy="176" rx="6" ry="8" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1" opacity="0.3" />
-      <ellipse cx="156" cy="176" rx="6" ry="8" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1" opacity="0.3" />
-      <text x="100" y="390" textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: '9px', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Back</text>
+      <path d="M 82,265 Q 78,305 84,340 Q 92,348 96,344 Q 100,310 100,275 Q 100,265 96,262 Z"
+        fill={mc('hamstrings')} fillOpacity={mo('hamstrings')} stroke={mc('hamstrings')} strokeWidth="0.8" />
+      <path d="M 138,265 Q 142,305 136,340 Q 128,348 124,344 Q 120,310 120,275 Q 120,265 124,262 Z"
+        fill={mc('hamstrings')} fillOpacity={mo('hamstrings')} stroke={mc('hamstrings')} strokeWidth="0.8" />
+      {/* Calves (rear) */}
+      <path d="M 82,355 Q 78,385 86,405 Q 92,407 96,402 Q 96,378 94,355 Z"
+        fill={mc('calves')} fillOpacity={mo('calves')} stroke={mc('calves')} strokeWidth="0.8" />
+      <path d="M 138,355 Q 142,385 134,405 Q 128,407 124,402 Q 124,378 126,355 Z"
+        fill={mc('calves')} fillOpacity={mo('calves')} stroke={mc('calves')} strokeWidth="0.8" />
+
+      <text x="110" y="435" textAnchor="middle" className="fill-muted-foreground"
+        style={{ fontSize: '9px', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Back</text>
     </svg>
   );
 };
