@@ -407,31 +407,6 @@ export const useFriends = () => {
     return { error: null };
   };
 
-  const deleteChallenge = async (challengeId: string) => {
-    if (!user) return { error: 'Not logged in' };
-    // Best-effort cleanup of dependent rows (RLS allows own deletes; creator deletes challenge)
-    await supabase.from('challenge_task_completions').delete().eq('challenge_id', challengeId);
-    await supabase.from('challenge_tasks').delete().eq('challenge_id', challengeId);
-    await supabase.from('challenge_checkins').delete().eq('challenge_id', challengeId);
-    await supabase.from('challenge_participants').delete().eq('challenge_id', challengeId);
-    const { error } = await supabase.from('challenges').delete().eq('id', challengeId);
-    if (error) return { error: error.message };
-    await fetchChallenges();
-    return { error: null };
-  };
-
-  const leaveChallenge = async (challengeId: string) => {
-    if (!user) return { error: 'Not logged in' };
-    const { error } = await supabase
-      .from('challenge_participants')
-      .delete()
-      .eq('challenge_id', challengeId)
-      .eq('user_id', user.id);
-    if (error) return { error: error.message };
-    await fetchChallenges();
-    return { error: null };
-  };
-
   const getFriendStreak = async (friendUserId: string) => {
     const { data: completions } = await supabase
       .from('habit_completions')
@@ -475,8 +450,6 @@ export const useFriends = () => {
     removeFriend,
     createChallenge,
     checkinChallenge,
-    deleteChallenge,
-    leaveChallenge,
     getFriendStreak,
     refetch: fetchAll,
   };

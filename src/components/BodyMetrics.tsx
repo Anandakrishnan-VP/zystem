@@ -7,9 +7,8 @@ import {
   getBMICategory,
   getBodyFatCategory,
 } from '@/hooks/useBodyMetrics';
-import { AnatomicalBody } from './AnatomicalBody';
 
-// Legacy 2D figure (kept as fallback)
+// Geometric human figure SVG that morphs based on BMI/body fat
 const HumanFigure = ({ bmi, bodyFat, sex }: { bmi: number | null; bodyFat: number | null; sex: 'male' | 'female' }) => {
   // Scale factor based on BMI (18.5-35 range mapped to 0.7-1.4)
   const scale = bmi ? Math.min(1.4, Math.max(0.7, (bmi - 10) / 18)) : 1;
@@ -229,17 +228,10 @@ export const BodyMetricsPanel = () => {
         </div>
       ) : (
         <div className="p-4">
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* 3D Anatomical body */}
-            <div className="w-full md:w-56 h-80 md:h-96 flex-shrink-0 bg-muted/20 border border-foreground/10 rounded-sm overflow-hidden">
-              <AnatomicalBody
-                bmi={bmi}
-                bodyFat={bodyFat}
-                sex={metrics.sex}
-                heightCm={metrics.height_cm}
-                waistCm={metrics.waist_cm}
-                hipCm={metrics.hip_cm}
-              />
+          <div className="flex gap-6">
+            {/* Human figure */}
+            <div className="w-28 flex-shrink-0">
+              <HumanFigure bmi={bmi} bodyFat={bodyFat} sex={metrics.sex} />
             </div>
 
             {/* Stats */}
