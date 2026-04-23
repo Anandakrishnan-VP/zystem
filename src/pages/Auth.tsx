@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { lovable } from '@/integrations/lovable/index';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
+import { AuthBackground } from '@/components/AuthBackground';
 
 const authSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -129,9 +130,11 @@ const Auth = () => {
   // Reset password view
   if (view === 'reset-password') {
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6">
-        <div className="w-full max-w-sm">
-          <div className="border border-foreground p-8">
+      <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 overflow-hidden">
+        <AuthBackground />
+        <div className="relative w-full max-w-sm z-10">
+          <div className="border border-foreground p-8 bg-background/80 backdrop-blur-sm">
+
             <h1 className="font-mono text-lg font-bold uppercase tracking-widest mb-6 text-center">
               Set New Password
             </h1>
@@ -168,8 +171,9 @@ const Auth = () => {
   // Forgot password view
   if (view === 'forgot-password') {
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6">
-        <div className="w-full max-w-sm">
+      <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 overflow-hidden">
+        <AuthBackground />
+        <div className="relative w-full max-w-sm z-10 border border-foreground p-8 bg-background/80 backdrop-blur-sm">
           <div className="flex flex-col items-center mb-12">
             <img src="/logo.png" alt="Zystem" className="w-16 h-16 mb-4" />
             <h1 className="font-mono text-lg font-bold uppercase tracking-widest text-center">
@@ -218,8 +222,9 @@ const Auth = () => {
 
   // Login / Signup view
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6">
-      <div className="w-full max-w-sm">
+    <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 overflow-hidden">
+      <AuthBackground />
+      <div className="relative w-full max-w-sm z-10 border border-foreground p-8 bg-background/80 backdrop-blur-sm">
         <div className="flex flex-col items-center mb-12">
           <img src="/logo.png" alt="Zystem" className="w-16 h-16 mb-4" />
           <h1 className="font-mono text-lg font-bold uppercase tracking-widest text-center">
