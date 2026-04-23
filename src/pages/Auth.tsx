@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { lovable } from '@/integrations/lovable/index';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
+import { AuthBackground } from '@/components/AuthBackground';
 
 const authSchema = z.object({
   email: z.string().email('Invalid email address'),
