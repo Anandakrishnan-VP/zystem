@@ -1,37 +1,58 @@
 
 
-# Set Up Capacitor for Native Android App
+## Muscle Tracker — Anatomical Outline + Tiered Glow
 
-## What This Does
-Configures your Zystem project to be wrapped in a native Android shell using Capacitor, so you can build and run it as a real Android app.
+Refactor `src/components/MuscleTracker.tsx` to give each muscle a clean anatomical outline, a 3-tier color system based on absolute training frequency thresholds, and a flame-like glow effect on each muscle group.
 
-## Steps
+### 1. New tier-based color logic (replace ratio system)
 
-### 1. Install Capacitor Dependencies
-Add these npm packages:
-- `@capacitor/core`
-- `@capacitor/cli` (dev dependency)
-- `@capacitor/android`
+Thresholds depend on the active `timeRange`:
 
-### 2. Initialize Capacitor
-Run `npx cap init` which creates `capacitor.config.ts` in the project root with:
-- **appId**: `app.lovable.9fb4131573014bd08fae17e5b130c2d0`
-- **appName**: `zystem`
-- **webDir**: `dist`
-- **server.url**: `https://9fb41315-7301-4bd0-8fae-17e5b130c2d0.lovableproject.com?forceHideBadge=true` (for live reload during development)
-- **server.cleartext**: `true`
+| Tier | Color | Weekly | Monthly | Yearly |
+|---|---|---|---|---|
+| **High** | Purple `hsl(270 80% 60%)` | ≥ 2 days | ≥ 6 days | ≥ 60 days |
+| **Mid** | Red `hsl(0 80% 55%)` | = 1 day | 2–5 days | 24–59 days |
+| **Low/None** | Yellow `hsl(50 95% 55%)` | 0 days | 0–1 days | 0–23 days |
 
-### 3. What You Need To Do Locally
-After I configure the project, you'll need to:
+```ts
+const getTier = (count: number, range: TimeRange) => {
+  const t = { weekly:[2,1], monthly:[6,2], yearly:[60,24] }[range];
+  if (count >= t[0]) return 'high';
+  if (count >= t[1]) return 'mid';
+  return 'low';
+};
+```
 
-1. **Export to GitHub** — use the "Export to GitHub" button in Lovable settings
-2. **Clone and install** — `git clone <repo>` then `npm install`
-3. **Add Android platform** — `npx cap add android`
-4. **Build and sync** — `npm run build && npx cap sync`
-5. **Open in Android Studio** — `npx cap open android`
-6. **Run on device/emulator** — Build and run from Android Studio
+Maps to fill color + glow color. Pass `timeRange` into `FrontDiagram` / `BackDiagram`.
 
-**Prerequisite**: You need [Android Studio](https://developer.android.com/studio) installed on your computer.
+### 2. Anatomical outline + graphic look
 
-For a detailed walkthrough, check out the Lovable blog post on building mobile apps with Capacitor.
+Wrap each diagram with a body silhouette outline (head, torso, arms, legs as connected `<path>`s with `stroke="hsl(var(--foreground))"`, `fill="none"`, `strokeWidth="1.5"`) so the figure reads as a coherent body, not floating shapes. Increase muscle stroke width to `2`, keep fill opacity high (`0.85`) for graphic-novel feel. Add subtle inner stroke lines (already present on abs) to chest, back, quads, shoulders for muscle definition.
+
+### 3. Flame/glow effect per muscle
+
+Add an SVG `<defs>` block in each diagram with a reusable `<filter id="flameGlow">`:
+
+```xml
+<filter id="flameGlow" x="-50%" y="-50%" width="200%" height="200%">
+  <feGaussianBlur stdDeviation="2.5" result="blur" />
+  <feMerge>
+    <feMergeNode in="blur" />
+    <feMergeNode in="blur" />
+    <feMergeNode in="SourceGraphic" />
+  </feMerge>
+</filter>
+```
+
+Apply `filter="url(#flameGlow)"` to every muscle shape. The glow color naturally inherits from each muscle's fill (purple/red/yellow), creating individual flame auras. Add a CSS keyframe `flicker` on `index.css` (subtle 1.2s opacity 0.85↔1) and apply via `className="animate-flicker"` for the "flamy" pulse — only on muscles in `high` or `mid` tier (low stays static).
+
+### 4. Update legend & checklist
+
+- Legend becomes 3 items: Purple (High), Red (Mid), Yellow (Low) with threshold tooltip text adapted to active range.
+- Checklist buttons reuse the same tier color for border/background consistency.
+
+### Files
+
+- **edit** `src/components/MuscleTracker.tsx` — tier logic, outline paths, SVG filter defs, glow application, updated legend
+- **edit** `src/index.css` — add `@keyframes flicker` and `.animate-flicker` utility
 
