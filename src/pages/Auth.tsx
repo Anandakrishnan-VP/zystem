@@ -224,18 +224,15 @@ const Auth = () => {
   return (
     <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 overflow-hidden">
       <AuthBackground />
-      <div className="relative w-full max-w-sm z-10 border border-foreground p-8 bg-background/80 backdrop-blur-sm">
-        <div className="flex flex-col items-center mb-12">
-          <img src="/logo.png" alt="Zystem" className="w-16 h-16 mb-4" />
-          <h1 className="font-mono text-lg font-bold uppercase tracking-widest text-center">
+      <div className="relative w-full max-w-xs z-10 border border-foreground p-6 bg-background/85 backdrop-blur-sm">
+        <div className="flex flex-col items-center mb-6">
+          <img src="/logo.png" alt="Zystem" className="w-10 h-10 mb-2" />
+          <h1 className="font-mono text-sm font-bold uppercase tracking-widest text-center">
             Zystem
           </h1>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-1">
-            Your Level Up Partner
-          </p>
         </div>
 
-        <h2 className="font-mono text-sm font-semibold uppercase tracking-widest mb-8">
+        <h2 className="font-mono text-[11px] font-semibold uppercase tracking-widest mb-5 text-muted-foreground">
           {view === 'login' ? 'Sign In' : 'Create Account'}
         </h2>
 
@@ -244,9 +241,9 @@ const Auth = () => {
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full border border-foreground px-4 py-3 font-mono text-sm uppercase tracking-wider hover:bg-foreground hover:text-background disabled:opacity-50 flex items-center justify-center gap-3 mb-6"
+            className="w-full border border-foreground px-3 py-2 font-mono text-xs uppercase tracking-wider hover:bg-foreground hover:text-background disabled:opacity-50 flex items-center justify-center gap-2 mb-4"
           >
-            <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+            <svg width="14" height="14" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
               <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
               <path d="M9.003 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9.003 18z" fill="#34A853"/>
               <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
@@ -256,44 +253,34 @@ const Auth = () => {
           </button>
 
           {/* Divider */}
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-3 mb-4">
             <div className="flex-1 border-t border-muted-foreground/30" />
-            <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">or</span>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">or</span>
             <div className="flex-1 border-t border-muted-foreground/30" />
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="font-mono text-xs uppercase tracking-wider block mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-background border border-foreground px-3 py-2 font-mono text-sm"
-              placeholder="you@example.com"
-              required
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full bg-background border border-foreground px-3 py-2 font-mono text-xs"
+            placeholder="email"
+            required
+          />
 
-          <div>
-            <label className="font-mono text-xs uppercase tracking-wider block mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-background border border-foreground px-3 py-2 font-mono text-sm"
-              placeholder="••••••••"
-              required
-            />
-          </div>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full bg-background border border-foreground px-3 py-2 font-mono text-xs"
+            placeholder="password"
+            required
+          />
 
           {error && (
-            <p className="font-mono text-xs text-destructive">
+            <p className="font-mono text-[10px] text-destructive">
               {error}
             </p>
           )}
@@ -301,39 +288,33 @@ const Auth = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full border border-foreground bg-foreground text-background px-4 py-3 font-mono text-sm uppercase tracking-wider hover:bg-background hover:text-foreground disabled:opacity-50"
+            className="w-full border border-foreground bg-foreground text-background px-3 py-2 font-mono text-xs uppercase tracking-wider hover:bg-background hover:text-foreground disabled:opacity-50"
           >
-            {loading ? 'Loading...' : view === 'login' ? 'Sign In' : 'Sign Up'}
+            {loading ? '...' : view === 'login' ? 'Sign In' : 'Sign Up'}
           </button>
         </form>
 
-        {view === 'login' && (
-          <div className="mt-4 text-center">
+        <div className="mt-4 flex items-center justify-between">
+          {view === 'login' ? (
             <button
               onClick={() => { setView('forgot-password'); setError(''); }}
-              className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
+              className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
             >
-              Forgot Password?
+              Forgot?
             </button>
-          </div>
-        )}
-
-        <div className="mt-6 text-center">
+          ) : <span />}
           <button
             onClick={() => {
               setView(view === 'login' ? 'signup' : 'login');
               setError('');
             }}
-            className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
           >
-            {view === 'login' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+            {view === 'login' ? 'Sign up' : 'Sign in'}
           </button>
         </div>
-
-        <p className="mt-8 text-center font-mono text-xs tracking-wider text-muted-foreground/60">
-          A <span className="font-bold text-foreground">Zyphor</span> product
-        </p>
       </div>
+
     </div>
   );
 };
