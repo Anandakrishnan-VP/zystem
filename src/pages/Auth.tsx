@@ -130,9 +130,11 @@ const Auth = () => {
   // Reset password view
   if (view === 'reset-password') {
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6">
-        <div className="w-full max-w-sm">
-          <div className="border border-foreground p-8">
+      <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 overflow-hidden">
+        <AuthBackground />
+        <div className="relative w-full max-w-sm z-10">
+          <div className="border border-foreground p-8 bg-background/80 backdrop-blur-sm">
+
             <h1 className="font-mono text-lg font-bold uppercase tracking-widest mb-6 text-center">
               Set New Password
             </h1>
@@ -169,9 +171,9 @@ const Auth = () => {
   // Forgot password view
   if (view === 'forgot-password') {
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6">
-        <div className="w-full max-w-sm">
-          <div className="flex flex-col items-center mb-12">
+      <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 overflow-hidden">
+        <AuthBackground />
+        <div className="relative w-full max-w-sm z-10 border border-foreground p-8 bg-background/80 backdrop-blur-sm">
             <img src="/logo.png" alt="Zystem" className="w-16 h-16 mb-4" />
             <h1 className="font-mono text-lg font-bold uppercase tracking-widest text-center">
               Zystem
