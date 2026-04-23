@@ -77,17 +77,23 @@ export const AuthBackground = () => {
         ZYSTEM // SECURE.NODE.01 // {new Date().getUTCFullYear()}
       </div>
 
-      {/* Bottom rotating motivational quote */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-full max-w-3xl px-8 text-center">
+      {/* Rotating motivational quote — top band, above the card */}
+      <div className="absolute top-16 md:top-20 left-1/2 -translate-x-1/2 w-full max-w-2xl px-8 text-center">
         <div key={quoteIdx} className="animate-fade-in">
-          <p className="font-mono text-xs md:text-sm uppercase tracking-[0.25em] text-foreground/80 leading-relaxed">
+          <p className="font-mono text-[11px] md:text-xs uppercase tracking-[0.25em] text-foreground/85 leading-relaxed">
             "{quote.text}"
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-muted-foreground mt-3">
+          <p className="font-mono text-[9px] uppercase tracking-[0.4em] text-muted-foreground mt-2">
             — {quote.author}
           </p>
         </div>
       </div>
+
+      {/* Bottom Zyphor footer */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground/70">
+        A <span className="font-bold text-foreground/80">Zyphor</span> product
+      </div>
+
 
       {/* Faint coordinate label top-right */}
       <div className="absolute top-6 right-1/2 translate-x-[140px] font-mono text-[9px] uppercase tracking-widest text-muted-foreground/60 hidden lg:block">
