@@ -174,6 +174,7 @@ const Auth = () => {
       <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 overflow-hidden">
         <AuthBackground />
         <div className="relative w-full max-w-sm z-10 border border-foreground p-8 bg-background/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center mb-12">
             <img src="/logo.png" alt="Zystem" className="w-16 h-16 mb-4" />
             <h1 className="font-mono text-lg font-bold uppercase tracking-widest text-center">
               Zystem
