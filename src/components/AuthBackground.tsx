@@ -13,6 +13,7 @@ const QUOTES = [
 
 export const AuthBackground = () => {
   const [quoteIdx, setQuoteIdx] = useState(0);
+  const [mouse, setMouse] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -21,30 +22,58 @@ export const AuthBackground = () => {
     return () => clearInterval(id);
   }, []);
 
+  useEffect(() => {
+    let raf = 0;
+    const onMove = (e: MouseEvent) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        // Normalized -1..1 from screen center
+        const x = (e.clientX / window.innerWidth) * 2 - 1;
+        const y = (e.clientY / window.innerHeight) * 2 - 1;
+        setMouse({ x, y });
+      });
+    };
+    window.addEventListener('mousemove', onMove);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
   const quote = QUOTES[quoteIdx];
+  const px = (mult: number) => `${mouse.x * mult}px`;
+  const py = (mult: number) => `${mouse.y * mult}px`;
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Grid lines */}
+      {/* Grid lines — drift with cursor */}
       <div
-        className="absolute inset-0 opacity-[0.07]"
+        className="absolute -inset-12 opacity-[0.07] transition-transform duration-[600ms] ease-out"
         style={{
           backgroundImage:
             'linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)',
           backgroundSize: '48px 48px',
+          transform: `translate3d(${px(-14)}, ${py(-14)}, 0)`,
         }}
       />
 
-      {/* Floating 3D planes */}
-      <div className="absolute left-[10%] top-[24%] h-40 w-40 border border-foreground/20 bg-background/10 backdrop-blur-sm auth-depth-panel auth-depth-panel-left" />
-      <div className="absolute right-[12%] bottom-[22%] h-48 w-48 border border-foreground/20 bg-background/10 backdrop-blur-sm auth-depth-panel auth-depth-panel-right" />
-
-      {/* Radial glow following theme accent */}
+      {/* Floating 3D planes — parallax */}
       <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-20 blur-3xl auth-glow-orbit"
+        className="absolute left-[10%] top-[24%] h-40 w-40 border border-foreground/20 bg-background/10 backdrop-blur-sm auth-depth-panel auth-depth-panel-left transition-transform duration-[500ms] ease-out"
+        style={{ translate: `${px(28)} ${py(28)}` }}
+      />
+      <div
+        className="absolute right-[12%] bottom-[22%] h-48 w-48 border border-foreground/20 bg-background/10 backdrop-blur-sm auth-depth-panel auth-depth-panel-right transition-transform duration-[500ms] ease-out"
+        style={{ translate: `${px(-36)} ${py(-36)}` }}
+      />
+
+      {/* Radial glow follows the cursor */}
+      <div
+        className="absolute top-1/2 left-1/2 w-[800px] h-[800px] rounded-full opacity-20 blur-3xl pointer-events-none transition-transform duration-[700ms] ease-out"
         style={{
           background:
             'radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%)',
+          transform: `translate3d(calc(-50% + ${px(80)}), calc(-50% + ${py(80)}), 0)`,
         }}
       />
 
