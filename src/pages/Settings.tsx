@@ -20,6 +20,8 @@ const AVATARS = [
 const Settings = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { profile, loading: profileLoading, updateProfile } = useProfile();
+  // Show content as soon as we have profile data (from cache or network)
+  const showLoader = authLoading || (profileLoading && !profile);
   const navigate = useNavigate();
   const { toast } = useToast();
   useAvatarTheme();
