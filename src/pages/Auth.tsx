@@ -130,9 +130,9 @@ const Auth = () => {
   // Reset password view
   if (view === 'reset-password') {
     return (
-      <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 overflow-hidden">
+      <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 pt-28 pb-10 md:pt-32 overflow-hidden">
         <AuthBackground />
-        <div className="relative w-full max-w-sm z-10">
+        <div className="relative w-full max-w-sm z-10 auth-card-3d animate-auth-float">
           <div className="border border-foreground/30 p-8 bg-background/20 backdrop-blur-xl shadow-2xl">
 
             <h1 className="font-mono text-lg font-bold uppercase tracking-widest mb-6 text-center">
@@ -171,9 +171,9 @@ const Auth = () => {
   // Forgot password view
   if (view === 'forgot-password') {
     return (
-      <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 overflow-hidden">
+      <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 pt-28 pb-10 md:pt-32 overflow-hidden">
         <AuthBackground />
-        <div className="relative w-full max-w-sm z-10 border border-foreground/30 p-8 bg-background/20 backdrop-blur-xl shadow-2xl">
+        <div className="relative w-full max-w-sm z-10 border border-foreground/30 p-8 bg-background/20 backdrop-blur-xl shadow-2xl auth-card-3d animate-auth-float">
           <div className="flex flex-col items-center mb-12">
             <img src="/logo.png" alt="Zystem" className="w-16 h-16 mb-4" />
             <h1 className="font-mono text-lg font-bold uppercase tracking-widest text-center">
@@ -222,9 +222,9 @@ const Auth = () => {
 
   // Login / Signup view
   return (
-    <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 overflow-hidden">
+    <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 pt-28 pb-10 md:pt-32 overflow-hidden">
       <AuthBackground />
-      <div className="relative w-full max-w-xs z-10 border border-foreground/30 p-6 bg-background/20 backdrop-blur-xl shadow-2xl">
+      <div className="relative w-full max-w-xs z-10 border border-foreground/30 p-6 bg-background/20 backdrop-blur-xl shadow-2xl auth-card-3d animate-auth-float animate-enter">
         <div className="flex flex-col items-center mb-6">
           <img src="/logo.png" alt="Zystem" className="w-10 h-10 mb-2" />
           <h1 className="font-mono text-sm font-bold uppercase tracking-widest text-center">

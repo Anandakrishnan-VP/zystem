@@ -302,7 +302,86 @@
     50% { opacity: 0.82; }
   }
 
+  @keyframes auth-float {
+    0%, 100% {
+      transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+    }
+    50% {
+      transform: translateY(-8px) rotateX(2deg) rotateY(-2deg);
+    }
+  }
+
+  @keyframes auth-orbit {
+    0%, 100% {
+      transform: translate3d(-50%, -50%, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(-50%, -52%, 0) scale(1.04);
+    }
+  }
+
+  @keyframes depth-panel-left {
+    0%, 100% {
+      transform: perspective(1200px) rotateY(22deg) rotateX(8deg) translateY(0px);
+      opacity: 0.22;
+    }
+    50% {
+      transform: perspective(1200px) rotateY(16deg) rotateX(10deg) translateY(-10px);
+      opacity: 0.3;
+    }
+  }
+
+  @keyframes depth-panel-right {
+    0%, 100% {
+      transform: perspective(1200px) rotateY(-20deg) rotateX(10deg) translateY(0px);
+      opacity: 0.18;
+    }
+    50% {
+      transform: perspective(1200px) rotateY(-14deg) rotateX(6deg) translateY(12px);
+      opacity: 0.28;
+    }
+  }
+
   .animate-flicker {
     animation: flicker 1.2s ease-in-out infinite;
+  }
+
+  .animate-auth-float {
+    animation: auth-float 7s ease-in-out infinite;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  .auth-card-3d {
+    transform-style: preserve-3d;
+    perspective: 1200px;
+  }
+
+  .auth-glow-orbit {
+    animation: auth-orbit 10s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .auth-depth-panel {
+    will-change: transform, opacity;
+    box-shadow: 0 0 40px hsl(var(--foreground) / 0.04);
+  }
+
+  .auth-depth-panel-left {
+    animation: depth-panel-left 8s ease-in-out infinite;
+  }
+
+  .auth-depth-panel-right {
+    animation: depth-panel-right 9s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-flicker,
+    .animate-auth-float,
+    .auth-glow-orbit,
+    .auth-depth-panel-left,
+    .auth-depth-panel-right {
+      animation: none;
+    }
   }
 }
