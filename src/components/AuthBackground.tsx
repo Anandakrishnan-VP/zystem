@@ -13,6 +13,7 @@ const QUOTES = [
 
 export const AuthBackground = () => {
   const [quoteIdx, setQuoteIdx] = useState(0);
+  const [mouse, setMouse] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -21,7 +22,27 @@ export const AuthBackground = () => {
     return () => clearInterval(id);
   }, []);
 
+  useEffect(() => {
+    let raf = 0;
+    const onMove = (e: MouseEvent) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        // Normalized -1..1 from screen center
+        const x = (e.clientX / window.innerWidth) * 2 - 1;
+        const y = (e.clientY / window.innerHeight) * 2 - 1;
+        setMouse({ x, y });
+      });
+    };
+    window.addEventListener('mousemove', onMove);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
   const quote = QUOTES[quoteIdx];
+  const px = (mult: number) => `${mouse.x * mult}px`;
+  const py = (mult: number) => `${mouse.y * mult}px`;
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
