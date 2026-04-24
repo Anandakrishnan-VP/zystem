@@ -35,9 +35,13 @@ export const AuthBackground = () => {
         }}
       />
 
+      {/* Floating 3D planes */}
+      <div className="absolute left-[10%] top-[24%] h-40 w-40 border border-foreground/20 bg-background/10 backdrop-blur-sm auth-depth-panel auth-depth-panel-left" />
+      <div className="absolute right-[12%] bottom-[22%] h-48 w-48 border border-foreground/20 bg-background/10 backdrop-blur-sm auth-depth-panel auth-depth-panel-right" />
+
       {/* Radial glow following theme accent */}
       <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-20 blur-3xl"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-20 blur-3xl auth-glow-orbit"
         style={{
           background:
             'radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%)',
@@ -72,13 +76,13 @@ export const AuthBackground = () => {
         ))}
       </div>
 
-      {/* Rotating motivational quote — top band, above the card */}
-      <div className="absolute top-16 md:top-20 left-1/2 -translate-x-1/2 w-full max-w-2xl px-8 text-center">
-        <div key={quoteIdx} className="animate-fade-in">
-          <p className="font-mono text-[11px] md:text-xs uppercase tracking-[0.25em] text-foreground/85 leading-relaxed">
+      {/* Rotating motivational quote — always above the auth card */}
+      <div className="absolute top-6 md:top-8 left-1/2 z-20 -translate-x-1/2 w-full max-w-3xl px-6 text-center">
+        <div key={quoteIdx} className="animate-fade-in rounded-sm border border-foreground/15 bg-background/10 px-4 py-3 backdrop-blur-sm shadow-2xl">
+          <p className="font-mono text-[10px] md:text-xs uppercase tracking-[0.22em] text-foreground/90 leading-relaxed text-balance">
             "{quote.text}"
           </p>
-          <p className="font-mono text-[9px] uppercase tracking-[0.4em] text-muted-foreground mt-2">
+          <p className="font-mono text-[9px] uppercase tracking-[0.35em] text-muted-foreground mt-2">
             — {quote.author}
           </p>
         </div>
@@ -88,7 +92,6 @@ export const AuthBackground = () => {
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground/70">
         A <span className="font-bold text-foreground/80">Zyphor</span> product
       </div>
-
 
       {/* Faint coordinate label top-right */}
       <div className="absolute top-6 right-1/2 translate-x-[140px] font-mono text-[9px] uppercase tracking-widest text-muted-foreground/60 hidden lg:block">
