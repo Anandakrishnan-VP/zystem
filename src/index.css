@@ -384,4 +384,32 @@
       animation: none;
     }
   }
+
+  /* Custom cursor */
+  .custom-cursor-active,
+  .custom-cursor-active * {
+    cursor: none !important;
+  }
+
+  .custom-cursor-ring {
+    transition: width 160ms ease, height 160ms ease, background-color 160ms ease, border-color 160ms ease;
+    will-change: transform;
+    mix-blend-mode: difference;
+  }
+
+  .custom-cursor-dot {
+    will-change: transform;
+    mix-blend-mode: difference;
+  }
+
+  .custom-cursor-ring.cursor-hover {
+    width: 3rem;
+    height: 3rem;
+    background: hsl(var(--foreground) / 0.1);
+  }
+
+  .custom-cursor-ring.cursor-active {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
 }

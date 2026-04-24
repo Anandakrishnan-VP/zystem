@@ -5,6 +5,8 @@ import { lovable } from '@/integrations/lovable/index';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 import { AuthBackground } from '@/components/AuthBackground';
+import { AuthScene3D } from '@/components/AuthScene3D';
+import { CustomCursor } from '@/components/CustomCursor';
 
 const authSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -132,6 +134,8 @@ const Auth = () => {
     return (
       <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 pt-28 pb-10 md:pt-32 overflow-hidden">
         <AuthBackground />
+        <AuthScene3D />
+        <CustomCursor />
         <div className="relative w-full max-w-sm z-10 auth-card-3d animate-auth-float">
           <div className="border border-foreground/30 p-8 bg-background/20 backdrop-blur-xl shadow-2xl">
 
@@ -173,6 +177,8 @@ const Auth = () => {
     return (
       <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 pt-28 pb-10 md:pt-32 overflow-hidden">
         <AuthBackground />
+        <AuthScene3D />
+        <CustomCursor />
         <div className="relative w-full max-w-sm z-10 border border-foreground/30 p-8 bg-background/20 backdrop-blur-xl shadow-2xl auth-card-3d animate-auth-float">
           <div className="flex flex-col items-center mb-12">
             <img src="/logo.png" alt="Zystem" className="w-16 h-16 mb-4" />
@@ -224,6 +230,8 @@ const Auth = () => {
   return (
     <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 pt-28 pb-10 md:pt-32 overflow-hidden">
       <AuthBackground />
+      <AuthScene3D />
+      <CustomCursor />
       <div className="relative w-full max-w-xs z-10 border border-foreground/30 p-6 bg-background/20 backdrop-blur-xl shadow-2xl auth-card-3d animate-auth-float animate-enter">
         <div className="flex flex-col items-center mb-6">
           <img src="/logo.png" alt="Zystem" className="w-10 h-10 mb-2" />
