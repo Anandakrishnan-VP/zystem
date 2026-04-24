@@ -20,6 +20,8 @@ const AVATARS = [
 const Settings = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { profile, loading: profileLoading, updateProfile } = useProfile();
+  // Show content as soon as we have profile data (from cache or network)
+  const showLoader = authLoading || (profileLoading && !profile);
   const navigate = useNavigate();
   const { toast } = useToast();
   useAvatarTheme();
@@ -41,7 +43,7 @@ const Settings = () => {
     }
   }, [profile]);
 
-  if (authLoading || profileLoading) {
+  if (showLoader) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
         <p className="font-mono text-sm uppercase tracking-wider">Loading...</p>

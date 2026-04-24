@@ -11,9 +11,37 @@ export interface Profile {
   updated_at: string;
 }
 
+const CACHE_PREFIX = 'profile_cache_';
+
+const getCachedProfile = (userId: string): Profile | null => {
+  try {
+    const raw = localStorage.getItem(CACHE_PREFIX + userId);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const setCachedProfile = (userId: string, profile: Profile | null) => {
+  try {
+    if (profile) {
+      localStorage.setItem(CACHE_PREFIX + userId, JSON.stringify(profile));
+    } else {
+      localStorage.removeItem(CACHE_PREFIX + userId);
+    }
+  } catch {
+    // ignore quota errors
+  }
+};
+
 export const useProfile = () => {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(() => {
+    // Synchronously hydrate from cache to skip loading on repeat visits
+    if (typeof window === 'undefined') return null;
+    // We don't have user yet on first render in some cases; try last cached user
+    return null;
+  });
   const [loading, setLoading] = useState(true);
   const [hasLoadedProfile, setHasLoadedProfile] = useState(false);
 
@@ -25,8 +53,17 @@ export const useProfile = () => {
       return;
     }
 
-    setLoading(true);
-    setHasLoadedProfile(false);
+    // Hydrate from cache immediately — no spinner for returning users
+    const cached = getCachedProfile(user.id);
+    if (cached) {
+      setProfile(cached);
+      setLoading(false);
+      setHasLoadedProfile(true);
+    } else {
+      setLoading(true);
+      setHasLoadedProfile(false);
+    }
+
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -38,6 +75,7 @@ export const useProfile = () => {
         console.error('Error fetching profile:', error);
       } else {
         setProfile(data);
+        setCachedProfile(user.id, data);
       }
     } catch (error) {
       console.error('Error fetching profile:', error);

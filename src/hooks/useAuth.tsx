@@ -65,6 +65,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
+    // Clear cached user data so next user doesn't see stale state
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith('profile_cache_'))
+      .forEach((k) => localStorage.removeItem(k));
     await supabase.auth.signOut();
   };
 
