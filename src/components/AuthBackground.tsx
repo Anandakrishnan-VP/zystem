@@ -72,11 +72,6 @@ export const AuthBackground = () => {
         ))}
       </div>
 
-      {/* Top status bar */}
-      <div className="absolute top-6 left-1/2 -translate-x-1/2 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground hidden md:block">
-        ZYSTEM // SECURE.NODE.01 // {new Date().getUTCFullYear()}
-      </div>
-
       {/* Rotating motivational quote — top band, above the card */}
       <div className="absolute top-16 md:top-20 left-1/2 -translate-x-1/2 w-full max-w-2xl px-8 text-center">
         <div key={quoteIdx} className="animate-fade-in">
