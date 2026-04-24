@@ -382,6 +382,9 @@
     .auth-depth-panel-left,
     .auth-depth-panel-right {
       animation: none;
+    }
+  }
+
   /* Custom cursor */
   .custom-cursor-active,
   .custom-cursor-active * {
@@ -408,7 +411,5 @@
   .custom-cursor-ring.cursor-active {
     width: 1.5rem;
     height: 1.5rem;
-  }
-}
   }
 }
