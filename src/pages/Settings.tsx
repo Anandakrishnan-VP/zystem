@@ -43,7 +43,7 @@ const Settings = () => {
     }
   }, [profile]);
 
-  if (authLoading || profileLoading) {
+  if (showLoader) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
         <p className="font-mono text-sm uppercase tracking-wider">Loading...</p>
