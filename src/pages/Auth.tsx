@@ -224,7 +224,7 @@ const Auth = () => {
   return (
     <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 overflow-hidden">
       <AuthBackground />
-      <div className="relative w-full max-w-xs z-10 border border-foreground p-6 bg-background/85 backdrop-blur-sm">
+      <div className="relative w-full max-w-xs z-10 border border-foreground/30 p-6 bg-background/20 backdrop-blur-xl shadow-2xl">
         <div className="flex flex-col items-center mb-6">
           <img src="/logo.png" alt="Zystem" className="w-10 h-10 mb-2" />
           <h1 className="font-mono text-sm font-bold uppercase tracking-widest text-center">
@@ -236,8 +236,8 @@ const Auth = () => {
           {view === 'login' ? 'Sign In' : 'Create Account'}
         </h2>
 
-        {/* Google Sign In - hidden on mobile/Capacitor */}
-        <div className="hidden md:block">
+        {/* Google Sign In */}
+        <div>
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
