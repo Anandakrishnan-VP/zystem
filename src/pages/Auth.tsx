@@ -133,7 +133,7 @@ const Auth = () => {
       <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 overflow-hidden">
         <AuthBackground />
         <div className="relative w-full max-w-sm z-10">
-          <div className="border border-foreground p-8 bg-background/80 backdrop-blur-sm">
+          <div className="border border-foreground/30 p-8 bg-background/20 backdrop-blur-xl shadow-2xl">
 
             <h1 className="font-mono text-lg font-bold uppercase tracking-widest mb-6 text-center">
               Set New Password
@@ -173,7 +173,7 @@ const Auth = () => {
     return (
       <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center px-6 overflow-hidden">
         <AuthBackground />
-        <div className="relative w-full max-w-sm z-10 border border-foreground p-8 bg-background/80 backdrop-blur-sm">
+        <div className="relative w-full max-w-sm z-10 border border-foreground/30 p-8 bg-background/20 backdrop-blur-xl shadow-2xl">
           <div className="flex flex-col items-center mb-12">
             <img src="/logo.png" alt="Zystem" className="w-16 h-16 mb-4" />
             <h1 className="font-mono text-lg font-bold uppercase tracking-widest text-center">
@@ -265,7 +265,7 @@ const Auth = () => {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-background border border-foreground px-3 py-2 font-mono text-xs"
+            className="w-full bg-background/30 border border-foreground/40 px-3 py-2 font-mono text-xs placeholder:text-muted-foreground/70 focus:bg-background/50 focus:border-foreground outline-none transition-colors"
             placeholder="email"
             required
           />
@@ -274,7 +274,7 @@ const Auth = () => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-background border border-foreground px-3 py-2 font-mono text-xs"
+            className="w-full bg-background/30 border border-foreground/40 px-3 py-2 font-mono text-xs placeholder:text-muted-foreground/70 focus:bg-background/50 focus:border-foreground outline-none transition-colors"
             placeholder="password"
             required
           />
