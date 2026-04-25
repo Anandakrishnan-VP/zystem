@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useGuestMode } from '@/hooks/useGuestMode';
+import { createLocalId, localKeys, readLocal, writeLocal } from '@/lib/localStore';
 
 interface CountdownTarget {
   id: string;
@@ -10,10 +12,16 @@ interface CountdownTarget {
 
 export function useCountdown() {
   const { user } = useAuth();
+  const { isGuest, refreshLocalData } = useGuestMode();
   const [target, setTarget] = useState<CountdownTarget | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchTarget = useCallback(async () => {
+    if (isGuest) {
+      setTarget(readLocal<CountdownTarget | null>(localKeys.countdown, null));
+      setLoading(false);
+      return;
+    }
     if (!user) { setLoading(false); return; }
     const { data } = await supabase
       .from('countdown_targets')
@@ -25,11 +33,18 @@ export function useCountdown() {
     
     setTarget(data || null);
     setLoading(false);
-  }, [user]);
+  }, [user, isGuest]);
 
   useEffect(() => { fetchTarget(); }, [fetchTarget]);
 
   const saveTarget = async (targetDate: string, label: string) => {
+    if (isGuest) {
+      const next = { id: target?.id || createLocalId('countdown'), target_date: targetDate, label };
+      setTarget(next);
+      writeLocal(localKeys.countdown, next);
+      refreshLocalData();
+      return;
+    }
     if (!user) return;
     if (target) {
       await supabase.from('countdown_targets').update({ target_date: targetDate, label, updated_at: new Date().toISOString() }).eq('id', target.id);
@@ -41,6 +56,12 @@ export function useCountdown() {
   };
 
   const clearTarget = async () => {
+    if (isGuest) {
+      localStorage.removeItem(localKeys.countdown);
+      setTarget(null);
+      refreshLocalData();
+      return;
+    }
     if (!user || !target) return;
     await supabase.from('countdown_targets').delete().eq('id', target.id);
     setTarget(null);
