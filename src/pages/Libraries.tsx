@@ -4,9 +4,12 @@ import { ArrowLeft, Plus, ExternalLink, Pencil, Trash2, FolderOpen, Search, X, C
 import { useAuth } from '@/hooks/useAuth';
 import { useLibrary, LinkGroup, SavedLink } from '@/hooks/useLibrary';
 import { useAvatarTheme } from '@/hooks/useTheme';
+import { useGuestMode } from '@/hooks/useGuestMode';
+import { AppLoadingScreen } from '@/components/AppLoadingScreen';
 
 const Libraries = () => {
   const { user, loading: authLoading } = useAuth();
+  const { isGuest } = useGuestMode();
   const navigate = useNavigate();
   const { groups, links, loading, addGroup, updateGroup, deleteGroup, addLink, updateLink, deleteLink, getLinksForGroup } = useLibrary();
   useAvatarTheme();
@@ -23,13 +26,13 @@ const Libraries = () => {
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    if (!authLoading && !user) navigate('/auth');
-  }, [user, authLoading, navigate]);
+    if (!authLoading && !user && !isGuest) navigate('/auth');
+  }, [user, authLoading, isGuest, navigate]);
 
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <p className="font-mono text-sm uppercase tracking-wider">Loading...</p>
+        <AppLoadingScreen label="Opening library" />
       </div>
     );
   }
