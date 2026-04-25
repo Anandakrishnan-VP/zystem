@@ -18,12 +18,15 @@ import { useHabitData } from '@/hooks/useHabitData';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useAvatarTheme } from '@/hooks/useTheme';
+import { useGuestMode } from '@/hooks/useGuestMode';
+import { DashboardSkeleton } from '@/components/DashboardSkeleton';
 
 
 const Index = () => {
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear);
   const { user, loading: authLoading, signOut } = useAuth();
+  const { isGuest } = useGuestMode();
   const { profile, loading: profileLoading, isProfileComplete, hasLoadedProfile } = useProfile();
   const navigate = useNavigate();
   useAvatarTheme();
@@ -44,26 +47,22 @@ const Index = () => {
   } = useHabitData();
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!authLoading && !user && !isGuest) {
       navigate('/auth');
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, isGuest, navigate]);
 
   useEffect(() => {
-    if (!authLoading && !profileLoading && hasLoadedProfile && user && !isProfileComplete) {
+    if (!isGuest && !authLoading && !profileLoading && hasLoadedProfile && user && !isProfileComplete) {
       navigate('/profile-setup');
     }
-  }, [user, authLoading, profileLoading, hasLoadedProfile, isProfileComplete, navigate]);
+  }, [user, authLoading, profileLoading, hasLoadedProfile, isProfileComplete, isGuest, navigate]);
 
   if (authLoading || profileLoading || dataLoading) {
-    return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <p className="font-mono text-sm uppercase tracking-wider">Loading...</p>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
-  if (!user || (hasLoadedProfile && !isProfileComplete)) {
+  if ((!user && !isGuest) || (!isGuest && hasLoadedProfile && !isProfileComplete)) {
     return null;
   }
 
@@ -86,7 +85,7 @@ const Index = () => {
                 size="sm"
               />
               <span className="font-mono text-xs uppercase tracking-wider hidden sm:block">
-                {profile?.username}
+                {profile?.username || (isGuest ? 'Guest' : '')}
               </span>
             </div>
             <button
