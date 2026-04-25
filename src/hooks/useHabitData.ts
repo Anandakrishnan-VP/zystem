@@ -338,6 +338,10 @@ export const useHabitData = () => {
 
   // Add todo
   const addTodo = useCallback(async (title: string, deadline: string) => {
+    if (isGuest) {
+      persistGuest(prev => ({ ...prev, todos: [...prev.todos, { id: createLocalId('todo'), title, deadline, completed: false }] }));
+      return;
+    }
     if (!user) return;
 
     const { data: newTodo, error } = await supabase
@@ -357,10 +361,14 @@ export const useHabitData = () => {
         }]
       }));
     }
-  }, [user]);
+  }, [user, isGuest, persistGuest]);
 
   // Toggle todo
   const toggleTodo = useCallback(async (id: string) => {
+    if (isGuest) {
+      persistGuest(prev => ({ ...prev, todos: prev.todos.map(t => t.id === id ? { ...t, completed: !t.completed } : t) }));
+      return;
+    }
     if (!user) return;
 
     const todo = data.todos.find(t => t.id === id);
@@ -377,10 +385,14 @@ export const useHabitData = () => {
         t.id === id ? { ...t, completed: !t.completed } : t
       )
     }));
-  }, [user, data.todos]);
+  }, [user, data.todos, isGuest, persistGuest]);
 
   // Remove todo
   const removeTodo = useCallback(async (id: string) => {
+    if (isGuest) {
+      persistGuest(prev => ({ ...prev, todos: prev.todos.filter(t => t.id !== id) }));
+      return;
+    }
     if (!user) return;
 
     await supabase
@@ -392,7 +404,7 @@ export const useHabitData = () => {
       ...prev,
       todos: prev.todos.filter(t => t.id !== id)
     }));
-  }, [user]);
+  }, [user, isGuest, persistGuest]);
 
   return {
     data,
