@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useGuestMode } from '@/hooks/useGuestMode';
+import { localKeys, readLocal, writeLocal } from '@/lib/localStore';
 
 export interface MuscleTrainingEntry {
   muscle_group: string;
@@ -47,6 +49,7 @@ const getDaysForRange = (range: TimeRange): number => {
 
 export function useMuscleTraining() {
   const { user } = useAuth();
+  const { isGuest, refreshLocalData } = useGuestMode();
   const [training, setTraining] = useState<MuscleTrainingEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<TimeRange>('weekly');
@@ -54,6 +57,16 @@ export function useMuscleTraining() {
   const today = new Date().toISOString().split('T')[0];
 
   const fetchTraining = useCallback(async () => {
+    if (isGuest) {
+      const all = readLocal<MuscleTrainingEntry[]>(localKeys.muscleTraining, []);
+      const daysBack = getDaysForRange(timeRange);
+      const fromDate = new Date();
+      fromDate.setDate(fromDate.getDate() - daysBack);
+      const fromStr = fromDate.toISOString().split('T')[0];
+      setTraining(all.filter(t => t.trained_date >= fromStr));
+      setLoading(false);
+      return;
+    }
     if (!user) return;
     const daysBack = getDaysForRange(timeRange);
     const fromDate = new Date();
@@ -70,11 +83,20 @@ export function useMuscleTraining() {
       setTraining(data);
     }
     setLoading(false);
-  }, [user, timeRange]);
+  }, [user, timeRange, isGuest]);
 
   useEffect(() => { fetchTraining(); }, [fetchTraining]);
 
   const toggleMuscle = async (muscle: MuscleGroup) => {
+    if (isGuest) {
+      const all = readLocal<MuscleTrainingEntry[]>(localKeys.muscleTraining, []);
+      const existing = all.find(t => t.muscle_group === muscle && t.trained_date === today);
+      const next = existing ? all.filter(t => !(t.muscle_group === muscle && t.trained_date === today)) : [...all, { muscle_group: muscle, trained_date: today }];
+      writeLocal(localKeys.muscleTraining, next);
+      refreshLocalData();
+      fetchTraining();
+      return;
+    }
     if (!user) return;
 
     const existing = training.find(

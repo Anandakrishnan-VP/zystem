@@ -9,6 +9,9 @@ import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useAvatarTheme } from '@/hooks/useTheme';
+import { useGuestMode } from '@/hooks/useGuestMode';
+import { importGuestDataToAccount } from '@/lib/importGuestData';
+import { AppLoadingScreen } from '@/components/AppLoadingScreen';
 
 const AVATARS = [
   { id: 1, url: '/avatars/avatar-1.png', label: 'Fire' },
@@ -20,6 +23,7 @@ const AVATARS = [
 const Settings = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { profile, loading: profileLoading, updateProfile } = useProfile();
+  const { isGuest, hasLocalData, exitGuest, refreshLocalData } = useGuestMode();
   // Show content as soon as we have profile data (from cache or network)
   const showLoader = authLoading || (profileLoading && !profile);
   const navigate = useNavigate();
@@ -29,12 +33,13 @@ const Settings = () => {
   const [username, setUsername] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!authLoading && !user && !isGuest) {
       navigate('/auth');
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, isGuest, navigate]);
 
   useEffect(() => {
     if (profile) {
@@ -46,12 +51,12 @@ const Settings = () => {
   if (showLoader) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <p className="font-mono text-sm uppercase tracking-wider">Loading...</p>
+        <AppLoadingScreen label="Preparing settings" />
       </div>
     );
   }
 
-  if (!user) return null;
+  if (!user && !isGuest) return null;
 
   const hasChanges =
     username.trim() !== (profile?.username || '') ||
@@ -70,6 +75,15 @@ const Settings = () => {
     } else {
       toast({ title: 'Profile updated', description: 'Your changes have been saved.' });
     }
+  };
+
+  const handleImportGuestData = async () => {
+    if (!user) return;
+    setIsImporting(true);
+    await importGuestDataToAccount(user.id);
+    refreshLocalData();
+    setIsImporting(false);
+    toast({ title: 'Guest data imported', description: 'Your local data was copied into this account.' });
   };
 
   return (
@@ -103,7 +117,7 @@ const Settings = () => {
               <div>
                 <p className="font-mono text-sm font-bold">{username || 'No name set'}</p>
                 <p className="font-mono text-xs text-muted-foreground uppercase tracking-wider">
-                  {user.email}
+                  {isGuest ? 'Local guest mode' : user?.email}
                 </p>
               </div>
             </div>
@@ -160,6 +174,24 @@ const Settings = () => {
           </div>
         </section>
 
+        {!isGuest && hasLocalData && (
+          <section className="border border-foreground/40 p-4 bg-background/40 backdrop-blur-md">
+            <h2 className="font-mono text-sm font-bold uppercase tracking-widest mb-2">
+              Guest Data Found
+            </h2>
+            <p className="font-mono text-xs text-muted-foreground mb-4">
+              Import the progress saved locally on this device into your account.
+            </p>
+            <Button
+              onClick={handleImportGuestData}
+              disabled={isImporting}
+              className="font-mono text-xs uppercase tracking-wider rounded-none border border-foreground bg-foreground text-background hover:bg-background hover:text-foreground disabled:opacity-50"
+            >
+              {isImporting ? 'Importing...' : 'Import Guest Data'}
+            </Button>
+          </section>
+        )}
+
         {/* Notifications Section */}
         <section>
           <h2 className="font-mono text-sm font-bold uppercase tracking-widest mb-6 border-b border-foreground pb-2">
@@ -171,11 +203,11 @@ const Settings = () => {
         {/* Sign Out */}
         <section className="border-t border-muted-foreground/30 pt-8">
           <Button
-            onClick={signOut}
+            onClick={isGuest ? () => { exitGuest(); navigate('/auth'); } : signOut}
             variant="outline"
             className="font-mono text-xs uppercase tracking-wider rounded-none border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
           >
-            Sign Out
+            {isGuest ? 'Exit Guest Mode' : 'Sign Out'}
           </Button>
         </section>
       </main>

@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useGuestMode } from './useGuestMode';
+import { GUEST_ID, createLocalId, localKeys, readLocal, writeLocal } from '@/lib/localStore';
 
 export interface BodyMetrics {
   id: string;
@@ -18,10 +20,16 @@ export interface BodyMetrics {
 
 export const useBodyMetrics = () => {
   const { user } = useAuth();
+  const { isGuest, refreshLocalData } = useGuestMode();
   const [metrics, setMetrics] = useState<BodyMetrics | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchMetrics = useCallback(async () => {
+    if (isGuest) {
+      setMetrics(readLocal<BodyMetrics | null>(localKeys.bodyMetrics, null));
+      setLoading(false);
+      return;
+    }
     if (!user) {
       setMetrics(null);
       setLoading(false);
@@ -36,11 +44,18 @@ export const useBodyMetrics = () => {
 
     if (!error && data) setMetrics(data);
     setLoading(false);
-  }, [user]);
+  }, [user, isGuest]);
 
   useEffect(() => { fetchMetrics(); }, [fetchMetrics]);
 
   const saveMetrics = async (values: Omit<BodyMetrics, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    if (isGuest) {
+      const next: BodyMetrics = { ...values, id: metrics?.id || createLocalId('metrics'), user_id: GUEST_ID, created_at: metrics?.created_at || new Date().toISOString(), updated_at: new Date().toISOString() };
+      setMetrics(next);
+      writeLocal(localKeys.bodyMetrics, next);
+      refreshLocalData();
+      return;
+    }
     if (!user) return;
 
     if (metrics) {

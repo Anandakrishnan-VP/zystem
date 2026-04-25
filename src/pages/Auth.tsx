@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { AuthBackground } from '@/components/AuthBackground';
 import { AuthScene3D } from '@/components/AuthScene3D';
 import { CustomCursor } from '@/components/CustomCursor';
+import { useGuestMode } from '@/hooks/useGuestMode';
 
 const authSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -25,6 +26,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   
   const { signIn, signUp, user } = useAuth();
+  const { continueAsGuest, hasLocalData } = useGuestMode();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,6 +60,11 @@ const Auth = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGuest = () => {
+    continueAsGuest();
+    navigate('/');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -258,6 +265,14 @@ const Auth = () => {
               <path d="M9.003 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.464.891 11.428 0 9.002 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29c.708-2.127 2.692-3.71 5.036-3.71z" fill="#EA4335"/>
             </svg>
             Continue with Google
+          </button>
+
+          <button
+            onClick={handleGuest}
+            type="button"
+            className="w-full border border-foreground/40 bg-background/20 px-3 py-2 font-mono text-xs uppercase tracking-wider hover:bg-foreground hover:text-background disabled:opacity-50 flex items-center justify-center gap-2 mb-4 backdrop-blur-md"
+          >
+            {hasLocalData ? 'Continue Local Guest' : 'Continue as Guest'}
           </button>
 
           {/* Divider */}

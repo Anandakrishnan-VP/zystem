@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useGuestMode } from './useGuestMode';
+import { createLocalId, localKeys, readLocal, writeLocal } from '@/lib/localStore';
 
 export interface Habit {
   id: string;
@@ -44,6 +46,7 @@ export const getDayOfWeek = (dateStr: string): string => {
 
 export const useHabitData = () => {
   const { user } = useAuth();
+  const { isGuest, refreshLocalData } = useGuestMode();
   const [data, setData] = useState<HabitData>({
     habitCompletions: {},
     habitList: [],
@@ -54,6 +57,12 @@ export const useHabitData = () => {
 
   // Fetch all data on mount
   useEffect(() => {
+    if (isGuest) {
+      setData(readLocal<HabitData>(localKeys.habitData, { habitCompletions: {}, habitList: [], bucketList: [], todos: [] }));
+      setLoading(false);
+      return;
+    }
+
     if (!user) {
       setLoading(false);
       return;
@@ -117,10 +126,30 @@ export const useHabitData = () => {
     };
 
     fetchData();
-  }, [user]);
+  }, [user, isGuest]);
+
+  const persistGuest = useCallback((updater: (prev: HabitData) => HabitData) => {
+    setData(prev => {
+      const next = updater(prev);
+      writeLocal(localKeys.habitData, next);
+      refreshLocalData();
+      return next;
+    });
+  }, [refreshLocalData]);
 
   // Toggle habit completion for a specific date
   const toggleHabitCompletion = useCallback(async (habitId: string, date: string) => {
+    if (isGuest) {
+      const currentValue = data.habitCompletions[habitId]?.[date] || false;
+      persistGuest(prev => ({
+        ...prev,
+        habitCompletions: {
+          ...prev.habitCompletions,
+          [habitId]: { ...prev.habitCompletions[habitId], [date]: !currentValue }
+        }
+      }));
+      return;
+    }
     if (!user) return;
     
     const currentValue = data.habitCompletions[habitId]?.[date] || false;
@@ -158,10 +187,17 @@ export const useHabitData = () => {
           completed: true
         });
     }
-  }, [user, data.habitCompletions]);
+  }, [user, data.habitCompletions, isGuest, persistGuest]);
 
   // Add new habit
   const addHabit = useCallback(async (name: string, dayOfWeek?: string) => {
+    if (isGuest) {
+      persistGuest(prev => ({
+        ...prev,
+        habitList: [...prev.habitList, { id: createLocalId('habit'), name, dayOfWeek: dayOfWeek || null }]
+      }));
+      return;
+    }
     if (!user) return;
 
     const { data: newHabit, error } = await supabase
@@ -181,10 +217,14 @@ export const useHabitData = () => {
         habitList: [...prev.habitList, { id: newHabit.id, name: newHabit.name, dayOfWeek: newHabit.day_of_week }]
       }));
     }
-  }, [user, data.habitList.length]);
+  }, [user, data.habitList.length, isGuest, persistGuest]);
 
   // Edit habit
   const editHabit = useCallback(async (id: string, newName: string) => {
+    if (isGuest) {
+      persistGuest(prev => ({ ...prev, habitList: prev.habitList.map(h => h.id === id ? { ...h, name: newName } : h) }));
+      return;
+    }
     if (!user) return;
 
     await supabase
@@ -198,10 +238,17 @@ export const useHabitData = () => {
         h.id === id ? { ...h, name: newName } : h
       )
     }));
-  }, [user]);
+  }, [user, isGuest, persistGuest]);
 
   // Delete habit
   const deleteHabit = useCallback(async (id: string) => {
+    if (isGuest) {
+      persistGuest(prev => {
+        const { [id]: removed, ...remainingCompletions } = prev.habitCompletions;
+        return { ...prev, habitList: prev.habitList.filter(h => h.id !== id), habitCompletions: remainingCompletions };
+      });
+      return;
+    }
     if (!user) return;
 
     await supabase
@@ -217,10 +264,14 @@ export const useHabitData = () => {
         habitCompletions: remainingCompletions
       };
     });
-  }, [user]);
+  }, [user, isGuest, persistGuest]);
 
   // Add bucket item
   const addBucketItem = useCallback(async (text: string, year: number) => {
+    if (isGuest) {
+      persistGuest(prev => ({ ...prev, bucketList: [...prev.bucketList, { id: createLocalId('bucket'), text, year, completed: false }] }));
+      return;
+    }
     if (!user) return;
 
     const { data: newItem, error } = await supabase
@@ -240,10 +291,14 @@ export const useHabitData = () => {
         }]
       }));
     }
-  }, [user]);
+  }, [user, isGuest, persistGuest]);
 
   // Toggle bucket item
   const toggleBucketItem = useCallback(async (id: string) => {
+    if (isGuest) {
+      persistGuest(prev => ({ ...prev, bucketList: prev.bucketList.map(b => b.id === id ? { ...b, completed: !b.completed } : b) }));
+      return;
+    }
     if (!user) return;
 
     const item = data.bucketList.find(b => b.id === id);
@@ -260,10 +315,14 @@ export const useHabitData = () => {
         b.id === id ? { ...b, completed: !b.completed } : b
       )
     }));
-  }, [user, data.bucketList]);
+  }, [user, data.bucketList, isGuest, persistGuest]);
 
   // Remove bucket item
   const removeBucketItem = useCallback(async (id: string) => {
+    if (isGuest) {
+      persistGuest(prev => ({ ...prev, bucketList: prev.bucketList.filter(b => b.id !== id) }));
+      return;
+    }
     if (!user) return;
 
     await supabase
@@ -275,10 +334,14 @@ export const useHabitData = () => {
       ...prev,
       bucketList: prev.bucketList.filter(b => b.id !== id)
     }));
-  }, [user]);
+  }, [user, isGuest, persistGuest]);
 
   // Add todo
   const addTodo = useCallback(async (title: string, deadline: string) => {
+    if (isGuest) {
+      persistGuest(prev => ({ ...prev, todos: [...prev.todos, { id: createLocalId('todo'), title, deadline, completed: false }] }));
+      return;
+    }
     if (!user) return;
 
     const { data: newTodo, error } = await supabase
@@ -298,10 +361,14 @@ export const useHabitData = () => {
         }]
       }));
     }
-  }, [user]);
+  }, [user, isGuest, persistGuest]);
 
   // Toggle todo
   const toggleTodo = useCallback(async (id: string) => {
+    if (isGuest) {
+      persistGuest(prev => ({ ...prev, todos: prev.todos.map(t => t.id === id ? { ...t, completed: !t.completed } : t) }));
+      return;
+    }
     if (!user) return;
 
     const todo = data.todos.find(t => t.id === id);
@@ -318,10 +385,14 @@ export const useHabitData = () => {
         t.id === id ? { ...t, completed: !t.completed } : t
       )
     }));
-  }, [user, data.todos]);
+  }, [user, data.todos, isGuest, persistGuest]);
 
   // Remove todo
   const removeTodo = useCallback(async (id: string) => {
+    if (isGuest) {
+      persistGuest(prev => ({ ...prev, todos: prev.todos.filter(t => t.id !== id) }));
+      return;
+    }
     if (!user) return;
 
     await supabase
@@ -333,7 +404,7 @@ export const useHabitData = () => {
       ...prev,
       todos: prev.todos.filter(t => t.id !== id)
     }));
-  }, [user]);
+  }, [user, isGuest, persistGuest]);
 
   return {
     data,
