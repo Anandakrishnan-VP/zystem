@@ -242,6 +242,13 @@ export const useHabitData = () => {
 
   // Delete habit
   const deleteHabit = useCallback(async (id: string) => {
+    if (isGuest) {
+      persistGuest(prev => {
+        const { [id]: removed, ...remainingCompletions } = prev.habitCompletions;
+        return { ...prev, habitList: prev.habitList.filter(h => h.id !== id), habitCompletions: remainingCompletions };
+      });
+      return;
+    }
     if (!user) return;
 
     await supabase
@@ -257,10 +264,14 @@ export const useHabitData = () => {
         habitCompletions: remainingCompletions
       };
     });
-  }, [user]);
+  }, [user, isGuest, persistGuest]);
 
   // Add bucket item
   const addBucketItem = useCallback(async (text: string, year: number) => {
+    if (isGuest) {
+      persistGuest(prev => ({ ...prev, bucketList: [...prev.bucketList, { id: createLocalId('bucket'), text, year, completed: false }] }));
+      return;
+    }
     if (!user) return;
 
     const { data: newItem, error } = await supabase
@@ -280,10 +291,14 @@ export const useHabitData = () => {
         }]
       }));
     }
-  }, [user]);
+  }, [user, isGuest, persistGuest]);
 
   // Toggle bucket item
   const toggleBucketItem = useCallback(async (id: string) => {
+    if (isGuest) {
+      persistGuest(prev => ({ ...prev, bucketList: prev.bucketList.map(b => b.id === id ? { ...b, completed: !b.completed } : b) }));
+      return;
+    }
     if (!user) return;
 
     const item = data.bucketList.find(b => b.id === id);
@@ -300,10 +315,14 @@ export const useHabitData = () => {
         b.id === id ? { ...b, completed: !b.completed } : b
       )
     }));
-  }, [user, data.bucketList]);
+  }, [user, data.bucketList, isGuest, persistGuest]);
 
   // Remove bucket item
   const removeBucketItem = useCallback(async (id: string) => {
+    if (isGuest) {
+      persistGuest(prev => ({ ...prev, bucketList: prev.bucketList.filter(b => b.id !== id) }));
+      return;
+    }
     if (!user) return;
 
     await supabase
@@ -315,7 +334,7 @@ export const useHabitData = () => {
       ...prev,
       bucketList: prev.bucketList.filter(b => b.id !== id)
     }));
-  }, [user]);
+  }, [user, isGuest, persistGuest]);
 
   // Add todo
   const addTodo = useCallback(async (title: string, deadline: string) => {
