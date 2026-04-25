@@ -4,9 +4,12 @@ import { ArrowLeft, Plus, Trash2, FileText } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotes, Note } from '@/hooks/useNotes';
 import { useAvatarTheme } from '@/hooks/useTheme';
+import { useGuestMode } from '@/hooks/useGuestMode';
+import { AppLoadingScreen } from '@/components/AppLoadingScreen';
 
 const Notes = () => {
   const { user, loading: authLoading } = useAuth();
+  const { isGuest } = useGuestMode();
   const { notes, loading, addNote, updateNote, deleteNote } = useNotes();
   const navigate = useNavigate();
   useAvatarTheme();
@@ -17,8 +20,8 @@ const Notes = () => {
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!authLoading && !user) navigate('/auth');
-  }, [user, authLoading, navigate]);
+    if (!authLoading && !user && !isGuest) navigate('/auth');
+  }, [user, authLoading, isGuest, navigate]);
 
   const activeNote = notes.find(n => n.id === activeId);
 
@@ -73,7 +76,7 @@ const Notes = () => {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <p className="font-mono text-sm uppercase tracking-wider">Loading...</p>
+        <AppLoadingScreen label="Opening notes" />
       </div>
     );
   }
