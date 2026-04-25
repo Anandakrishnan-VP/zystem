@@ -154,7 +154,7 @@ function scheduleDeadlineCheck() {
     if (Notification.permission === 'granted') {
       new Notification('📋 Deadline Reminder', {
         body: `Check your tasks — you may have deadlines coming up tomorrow (${tomorrowStr})!`,
-        icon: '/favicon.ico',
+        icon: '/favicon.svg',
       });
     }
   };
@@ -186,7 +186,7 @@ function scheduleDailyReminder() {
       if (Notification.permission === 'granted') {
         new Notification('🔥 Don\'t break your streak!', {
           body: 'Time to log your habits for today. Keep the momentum going!',
-          icon: '/favicon.ico',
+          icon: '/favicon.svg',
         });
       }
     }

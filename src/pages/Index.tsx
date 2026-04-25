@@ -72,7 +72,7 @@ const Index = () => {
       <header className="border-b border-foreground">
         <div className="container max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Zystem" className="w-8 h-8" />
+            <img src="/logo.svg" alt="Zystem" className="w-8 h-8" />
             <h1 className="font-mono text-lg font-bold uppercase tracking-widest">
               Zystem
             </h1>

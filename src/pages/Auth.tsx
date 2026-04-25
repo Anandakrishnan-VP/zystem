@@ -188,7 +188,7 @@ const Auth = () => {
         <CustomCursor />
         <div className="relative w-full max-w-sm z-10 border border-foreground/30 p-8 bg-background/20 backdrop-blur-xl shadow-2xl auth-card-3d animate-auth-float">
           <div className="flex flex-col items-center mb-12">
-            <img src="/logo.png" alt="Zystem" className="w-16 h-16 mb-4" />
+            <img src="/logo.svg" alt="Zystem" className="w-16 h-16 mb-4" />
             <h1 className="font-mono text-lg font-bold uppercase tracking-widest text-center">
               Zystem
             </h1>
@@ -241,7 +241,7 @@ const Auth = () => {
       <CustomCursor />
       <div className="relative w-full max-w-xs z-10 border border-foreground/30 p-6 bg-background/20 backdrop-blur-xl shadow-2xl auth-card-3d animate-auth-float animate-enter">
         <div className="flex flex-col items-center mb-6">
-          <img src="/logo.png" alt="Zystem" className="w-10 h-10 mb-2" />
+          <img src="/logo.svg" alt="Zystem" className="w-10 h-10 mb-2" />
           <h1 className="font-mono text-sm font-bold uppercase tracking-widest text-center">
             Zystem
           </h1>
