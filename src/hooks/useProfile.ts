@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useGuestMode } from './useGuestMode';
+import { GUEST_ID, localKeys, readLocal, writeLocal } from '@/lib/localStore';
 
 export interface Profile {
   id: string;
@@ -36,6 +38,7 @@ const setCachedProfile = (userId: string, profile: Profile | null) => {
 
 export const useProfile = () => {
   const { user } = useAuth();
+  const { isGuest, refreshLocalData } = useGuestMode();
   const [profile, setProfile] = useState<Profile | null>(() => {
     // Synchronously hydrate from cache to skip loading on repeat visits
     if (typeof window === 'undefined') return null;
@@ -46,6 +49,23 @@ export const useProfile = () => {
   const [hasLoadedProfile, setHasLoadedProfile] = useState(false);
 
   const fetchProfile = useCallback(async () => {
+    if (isGuest) {
+      const guestProfile = readLocal<Profile | null>(localKeys.profile, null) || {
+        id: GUEST_ID,
+        user_id: GUEST_ID,
+        username: 'Guest',
+        avatar_url: '/avatars/avatar-3.png',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      writeLocal(localKeys.profile, guestProfile);
+      setProfile(guestProfile);
+      setLoading(false);
+      setHasLoadedProfile(true);
+      refreshLocalData();
+      return;
+    }
+
     if (!user) {
       setProfile(null);
       setHasLoadedProfile(false);
@@ -83,13 +103,28 @@ export const useProfile = () => {
       setLoading(false);
       setHasLoadedProfile(true);
     }
-  }, [user]);
+  }, [user, isGuest, refreshLocalData]);
 
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
 
   const updateProfile = async (username: string, avatar_url: string) => {
+    if (isGuest) {
+      const nextProfile: Profile = {
+        id: profile?.id || GUEST_ID,
+        user_id: GUEST_ID,
+        username,
+        avatar_url,
+        created_at: profile?.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      setProfile(nextProfile);
+      writeLocal(localKeys.profile, nextProfile);
+      refreshLocalData();
+      return { error: null };
+    }
+
     if (!user) return { error: new Error('No user logged in') };
 
     const { error } = await supabase
