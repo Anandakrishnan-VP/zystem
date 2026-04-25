@@ -100,11 +100,19 @@ export function useLibrary() {
   };
 
   const updateLink = async (id: string, updates: Partial<Pick<SavedLink, 'title' | 'url' | 'notes' | 'tags' | 'group_id'>>) => {
+    if (isGuest) {
+      persist(groups, links.map(l => l.id === id ? { ...l, ...updates } : l));
+      return;
+    }
     await supabase.from('saved_links').update(updates).eq('id', id);
     setLinks(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
   };
 
   const deleteLink = async (id: string) => {
+    if (isGuest) {
+      persist(groups, links.filter(l => l.id !== id));
+      return;
+    }
     await supabase.from('saved_links').delete().eq('id', id);
     setLinks(prev => prev.filter(l => l.id !== id));
   };
