@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useGuestMode } from './useGuestMode';
+import { localKeys, readLocal, writeLocal } from '@/lib/localStore';
 
 export interface StreakRevivalData {
   revivalsAvailable: number;
@@ -10,6 +12,7 @@ export interface StreakRevivalData {
 
 export const useStreakRevivals = () => {
   const { user } = useAuth();
+  const { isGuest, refreshLocalData } = useGuestMode();
   const [data, setData] = useState<StreakRevivalData>({
     revivalsAvailable: 0,
     revivalsEarnedTotal: 0,
@@ -19,6 +22,11 @@ export const useStreakRevivals = () => {
 
   // Fetch revival data
   useEffect(() => {
+    if (isGuest) {
+      setData(readLocal<StreakRevivalData>(localKeys.streakRevivals, { revivalsAvailable: 0, revivalsEarnedTotal: 0, revivedDates: [] }));
+      setLoading(false);
+      return;
+    }
     if (!user) {
       setLoading(false);
       return;
@@ -50,10 +58,20 @@ export const useStreakRevivals = () => {
     };
 
     fetchData();
-  }, [user]);
+  }, [user, isGuest]);
 
   // Update revivals earned based on streak
   const updateRevivalsFromStreak = useCallback(async (currentStreak: number) => {
+    if (isGuest) {
+      const newRevivalsEarned = Math.floor(currentStreak / 7);
+      if (newRevivalsEarned > data.revivalsEarnedTotal) {
+        const next = { ...data, revivalsAvailable: data.revivalsAvailable + (newRevivalsEarned - data.revivalsEarnedTotal), revivalsEarnedTotal: newRevivalsEarned };
+        setData(next);
+        writeLocal(localKeys.streakRevivals, next);
+        refreshLocalData();
+      }
+      return;
+    }
     if (!user) return;
 
     const newRevivalsEarned = Math.floor(currentStreak / 7);
@@ -93,10 +111,18 @@ export const useStreakRevivals = () => {
         revivalsEarnedTotal: newRevivalsEarned
       }));
     }
-  }, [user, data.revivalsAvailable, data.revivalsEarnedTotal]);
+  }, [user, data, isGuest, refreshLocalData]);
 
   // Use a revival to save a missed date
   const useRevival = useCallback(async (missedDate: string): Promise<boolean> => {
+    if (isGuest) {
+      if (data.revivalsAvailable <= 0) return false;
+      const next = { ...data, revivalsAvailable: data.revivalsAvailable - 1, revivedDates: [...data.revivedDates, missedDate] };
+      setData(next);
+      writeLocal(localKeys.streakRevivals, next);
+      refreshLocalData();
+      return true;
+    }
     if (!user || data.revivalsAvailable <= 0) return false;
 
     // Insert revived date
@@ -124,7 +150,7 @@ export const useStreakRevivals = () => {
     }));
 
     return true;
-  }, [user, data.revivalsAvailable]);
+  }, [user, data, isGuest, refreshLocalData]);
 
   return {
     data,
